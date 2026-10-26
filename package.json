@@ -1,8 +1,8 @@
 {
-  "name": "cryptor-next",
+  "name": "promeo-network",
   "version": "1.0.0",
   "private": true,
-  "description": "Cryptor — premium crypto, Web3 & SaaS landing page (Next.js App Router)",
+  "description": "ProMeo — Autonomous AI Agent Procurement Network on Mezo",
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 3000",
     "build": "next build",
