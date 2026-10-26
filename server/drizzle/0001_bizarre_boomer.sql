@@ -1,0 +1,2 @@
+ALTER TABLE "webhook_deliveries" ADD COLUMN "source_key" text;--> statement-breakpoint
+CREATE UNIQUE INDEX "webhook_deliveries_source_uq" ON "webhook_deliveries" USING btree ("endpoint_id","source_key") WHERE source_key is not null;

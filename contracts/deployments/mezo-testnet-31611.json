@@ -1,0 +1,13 @@
+{
+  "agentPolicyRegistry": "0x957dbD62B6aF0C13C94D07814B06323d53198ccC",
+  "blockNumber": 16364920,
+  "chainId": 31611,
+  "deployedAt": 1792950968,
+  "feeBps": 100,
+  "feeRecipient": "0xC9009F2B584B6F7D70f95efFf25fF7B3b0d5A3Df",
+  "musd": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+  "network": "mezo-testnet",
+  "procurementEscrow": "0x88EDbF3E966Ba23F0262771CBCF6d217718BD048",
+  "registryAdmin": "0xE741dE071fe801913A2f4Fbc53bC4DCcfF422F89",
+  "testDoubleMUSD": false
+}

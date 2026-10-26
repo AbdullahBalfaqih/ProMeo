@@ -1,0 +1,42 @@
+{
+  "name": "@apn/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Agent Procurement Network — API, policy engine, indexer and webhook delivery",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:reset": "tsx src/db/reset.ts",
+    "seed": "tsx scripts/seed.ts",
+    "indexer": "tsx src/indexer/worker.ts",
+    "e2e": "tsx scripts/e2e.ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.2",
+    "@fastify/rate-limit": "^10.2.2",
+    "dotenv": "^18.0.8",
+    "drizzle-orm": "^0.38.3",
+    "fastify": "^5.2.0",
+    "pg": "^8.13.1",
+    "pino": "^9.6.0",
+    "viem": "^2.22.7",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/pg": "^8.11.10",
+    "drizzle-kit": "^0.30.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

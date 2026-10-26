@@ -1,0 +1,623 @@
+openapi: 3.1.0
+info:
+  title: Agent Procurement Network API
+  version: 0.1.0
+  description: >
+    Multi-tenant B2B procurement control plane, deterministic policy engine,
+    structured offer discovery, and non-custodial MUSD escrow coordination on
+    Mezo (testnet 31611 / mainnet 31612).
+servers:
+  - url: http://localhost:4000
+    description: Local control plane
+components:
+  securitySchemes:
+    BearerToken:
+      type: http
+      scheme: bearer
+      description: >
+        User API key (`apn_u_<prefix>_<secret>`) or scoped AI agent credential
+        (`apn_a_<prefix>_<secret>`). Only SHA-256 hashes of secrets are stored.
+    OperatorToken:
+      type: apiKey
+      in: header
+      name: x-operator-token
+      description: Platform-operator credential required by `/v1/operator/*`.
+  parameters:
+    IdempotencyKey:
+      name: idempotency-key
+      in: header
+      required: false
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 128
+      description: >
+        Scoped to `(orgId, method, path, key)`. Replaying with an identical
+        canonical body returns the stored status and response with
+        `idempotent-replay: true`; a different body returns `409 Conflict`.
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            details: {}
+            requestId: { type: string }
+security:
+  - BearerToken: []
+paths:
+  /healthz:
+    get:
+      summary: Liveness and uptime probe
+      security: []
+      responses:
+        "200":
+          description: Server healthy
+  /v1/meta:
+    get:
+      summary: Chain, MUSD, contract addresses, and capability metadata
+      security: []
+      responses:
+        "200":
+          description: Protocol metadata configured for this deployment
+  /v1/bootstrap/status:
+    get:
+      summary: Check whether developer bootstrap is enabled
+      security: []
+      responses:
+        "200":
+          description: Bootstrap status
+  /v1/bootstrap:
+    post:
+      summary: Create initial organization, owner, API key, and active v1 policy (local demo only)
+      security: []
+      responses:
+        "201":
+          description: Bootstrapped organization and one-time owner token
+        "412":
+          description: Bootstrap disabled (`ALLOW_BOOTSTRAP=false`)
+  /v1/org:
+    get:
+      summary: Get current tenant organization and caller principal
+      responses:
+        "200": { description: Organization and principal }
+    patch:
+      summary: Update organization name, treasury wallet address, or settings
+      responses:
+        "200": { description: Updated organization }
+  /v1/org/members:
+    get:
+      summary: List members in the caller's organization
+      responses:
+        "200": { description: Organization members }
+    post:
+      summary: Add a member with an explicit RBAC role
+      responses:
+        "201": { description: Created user }
+  /v1/api-keys:
+    get:
+      summary: List user API keys in the organization (prefixes only)
+      responses:
+        "200": { description: API key list }
+    post:
+      summary: Issue a new user API key (secret returned once)
+      responses:
+        "201": { description: One-time API key token }
+  /v1/api-keys/{id}:
+    delete:
+      summary: Revoke a user API key
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Revoked }
+  /v1/agents:
+    get:
+      summary: List AI agents in the organization
+      responses:
+        "200": { description: Agent list }
+    post:
+      summary: Register a restricted AI agent identity
+      responses:
+        "201": { description: Created agent }
+  /v1/agents/scopes:
+    get:
+      summary: List permitted agent credential scopes
+      responses:
+        "200": { description: Allowed scopes (`request:create`, `request:read`, `offer:read`, `offer:discover`, `budget:read`, `agreement:read`, `agreement:fund_intent`) }
+  /v1/agents/{id}:
+    get:
+      summary: Get agent details, credentials, and active budget windows
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Agent profile, credentials, and budgets }
+    patch:
+      summary: Update agent status (`active`, `paused`, `revoked`), wallet, or constraints
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Updated agent }
+  /v1/agents/{id}/credentials:
+    post:
+      summary: Issue a scoped credential for an AI agent (token returned once)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "201": { description: One-time agent token }
+  /v1/agents/{id}/credentials/{credentialId}:
+    delete:
+      summary: Revoke an agent credential immediately
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: credentialId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Revoked }
+  /v1/agents/{id}/budgets:
+    put:
+      summary: Set or update per-request, daily, and monthly MUSD budgets for an agent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Updated budget windows }
+  /v1/agents/{id}/budget-reservations:
+    get:
+      summary: List atomic budget reservations for an agent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Reservation list }
+  /v1/policies:
+    get:
+      summary: List immutable policy versions for the organization
+      responses:
+        "200": { description: Policy versions }
+    post:
+      summary: Create a new immutable policy version (draft or immediately active)
+      responses:
+        "201": { description: Created policy version and canonical keccak256 hash }
+  /v1/policies/{id}:
+    get:
+      summary: Fetch a policy version by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Policy version }
+  /v1/policies/{id}/activate:
+    post:
+      summary: Activate a policy version and archive the previous active version
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Activated policy }
+  /v1/policies/simulate:
+    post:
+      summary: Dry-run a procurement context against the active policy without persisting state
+      responses:
+        "200": { description: Deterministic policy evaluation trace }
+  /v1/vendors:
+    get:
+      summary: List vendor profiles (cross-tenant directory or org-scoped with `mine=true`)
+      responses:
+        "200": { description: Vendor list }
+    post:
+      summary: Register a vendor profile for the caller's organization
+      responses:
+        "201": { description: Created vendor }
+  /v1/vendors/{id}:
+    patch:
+      summary: Update a vendor profile owned by the caller's organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Updated vendor }
+  /v1/vendors/{id}/services:
+    get:
+      summary: List service manifests for a vendor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Service manifests }
+    post:
+      summary: Publish a signed/hashed service manifest for a vendor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "201": { description: Created service manifest }
+  /v1/services:
+    get:
+      summary: Search active vendor service manifests across the network
+      responses:
+        "200": { description: Service manifest list }
+  /v1/operator/vendors/{id}/verify:
+    post:
+      summary: Platform-operator verification and tier assignment for a vendor
+      security:
+        - OperatorToken: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Updated verification state }
+  /v1/requests:
+    get:
+      summary: List procurement requests in the caller's organization
+      responses:
+        "200": { description: Paginated tenant-scoped requests }
+    post:
+      summary: Create a procurement request (human or scoped AI agent)
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      responses:
+        "201": { description: Created procurement request }
+  /v1/requests/{id}:
+    get:
+      summary: Get procurement request details (returns 404 across tenants)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Procurement request }
+        "404": { description: Not found }
+  /v1/requests/{id}/publish:
+    post:
+      summary: Transition a draft request to `open` so vendors can submit offers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Published request }
+  /v1/requests/{id}/cancel:
+    post:
+      summary: Cancel a non-terminal request and release any pending budget holds
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Cancelled request }
+  /v1/requests/{id}/events:
+    get:
+      summary: List state transition events for a request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Request state timeline }
+  /v1/requests/{id}/policy-evaluations:
+    get:
+      summary: List persisted policy evaluations for a request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Policy evaluation log }
+  /v1/requests/{id}/offers:
+    get:
+      summary: List offers submitted for a buyer's request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Offers for request }
+  /v1/requests/{id}/offers/discover:
+    post:
+      summary: Run deterministic ranking and active policy evaluation over open offers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Ranked offers with score breakdowns and policy outcomes }
+  /v1/requests/{id}/award:
+    post:
+      summary: Evaluate policy on an offer; either approve (`allow`), open human approval (`require_human_approval`), or block (`deny`)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Award outcome (`approved` or `pending_approval`) }
+        "403": { description: Denied by active policy }
+  /v1/approvals:
+    get:
+      summary: List human approval gates in the caller's organization
+      responses:
+        "200": { description: Approval queue }
+  /v1/approvals/{id}/decide:
+    post:
+      summary: Human approver decision (`approved` or `rejected`); enforces no self-approval and blocks AI agents
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Updated approval and request status }
+        "403": { description: Caller is an agent or the original requester }
+  /v1/marketplace/requests:
+    get:
+      summary: List open procurement requests with redacted public fields for vendors
+      responses:
+        "200": { description: Redacted open marketplace requests }
+  /v1/marketplace/requests/{id}:
+    get:
+      summary: Get redacted public projection of an open request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Redacted open request }
+  /v1/marketplace/requests/{id}/offers:
+    post:
+      summary: Submit a structured vendor offer (with optional EIP-712 vendor signature)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "201": { description: Submitted offer with canonical `termsHash` }
+  /v1/marketplace/me/offers:
+    get:
+      summary: List offers submitted by vendors belonging to the caller's organization
+      responses:
+        "200": { description: Vendor offer list }
+  /v1/offers/hash:
+    post:
+      summary: Compute canonical JSON, `termsHash`, and EIP-712 typed data for offer terms
+      responses:
+        "200": { description: Deterministic hash and EIP-712 payload }
+  /v1/offers/{id}:
+    get:
+      summary: Fetch an offer (visible to buyer org or submitting vendor org)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Offer details }
+  /v1/offers/{id}/signature-payload:
+    get:
+      summary: Get EIP-712 typed data payload for signing an offer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: EIP-712 typed data }
+  /v1/offers/by-hash/{hash}:
+    get:
+      summary: Resolve an offer by its `0x`-prefixed 32-byte `termsHash`
+      parameters:
+        - name: hash
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Matching offer }
+  /v1/agreements:
+    get:
+      summary: List procurement agreements visible to the caller's organization
+      responses:
+        "200": { description: Agreement list }
+    post:
+      summary: Create an agreement from an approved request, atomically reserve agent budget, and return non-custodial MUSD escrow calldata
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      responses:
+        "201": { description: Created agreement + `approve` and `createAgreement` tx intents }
+        "403": { description: Agent budget exceeded (`budget_exceeded`) }
+        "412": { description: Request not approved or offer hash tampered }
+  /v1/agreements/{id}:
+    get:
+      summary: Fetch agreement details, escrow state, milestones, and disputes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Agreement detail bundle }
+  /v1/agreements/{id}/intent-metadata:
+    get:
+      summary: Return on-chain `agreementId` (bytes32) and hashes for verification
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: On-chain identifiers }
+  /v1/agreements/{id}/actions/{action}:
+    post:
+      summary: Build unsigned transaction calldata for an escrow lifecycle action (`fund`, `deliver`, `accept`, `release-expired`, `refund-undelivered`)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: action
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [fund, deliver, accept, release-expired, refund-undelivered]
+      responses:
+        "200": { description: Unsigned transaction intent (`to`, `data`, `chainId`) }
+  /v1/agreements/{id}/confirm:
+    post:
+      summary: Index and reconcile a broadcast transaction hash against `ProcurementEscrow`
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Reconciled agreement and escrow state }
+  /v1/agreements/{id}/disputes:
+    post:
+      summary: Open a dispute on a funded/delivered agreement and return `openDispute` calldata
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "201": { description: Dispute record and unsigned `openDispute` transaction intent }
+  /v1/disputes:
+    get:
+      summary: List disputes visible to the caller's organization
+      responses:
+        "200": { description: Dispute list }
+  /v1/disputes/{id}:
+    get:
+      summary: Fetch a dispute by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Dispute details }
+  /v1/disputes/{id}/resolve:
+    post:
+      summary: Resolve a dispute with an explicit buyer/vendor MUSD split (submits on-chain if `RESOLVER_PRIVATE_KEY` is configured, otherwise returns calldata)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Resolution tx hash or unsigned calldata }
+  /v1/webhooks:
+    get:
+      summary: List webhook endpoints for the caller's organization
+      responses:
+        "200": { description: Webhook endpoint list }
+    post:
+      summary: Register a signed webhook endpoint (HMAC secret returned once, stored encrypted with AES-256-GCM)
+      responses:
+        "201": { description: Created endpoint and one-time signing secret }
+  /v1/webhooks/{id}:
+    delete:
+      summary: Delete a webhook endpoint
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Deleted }
+  /v1/webhooks/deliveries:
+    get:
+      summary: List webhook delivery attempts and statuses for the organization
+      responses:
+        "200": { description: Delivery log }
+  /v1/webhooks/{id}/test:
+    post:
+      summary: Enqueue and immediately attempt a signed `webhook.test` delivery
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Test delivery queued and ticked }
+  /v1/audit:
+    get:
+      summary: List tenant-scoped tamper-evident audit log entries
+      responses:
+        "200": { description: Audit entries }
+  /v1/audit/verify:
+    get:
+      summary: Recompute and verify the tenant's SHA-256 audit hash chain from genesis
+      responses:
+        "200": { description: Verification result (`valid`, `checked`, `head`) }
+  /v1/admin/indexer:
+    get:
+      summary: Inspect on-chain indexer cursor and latest indexed block
+      responses:
+        "200": { description: Indexer status }
+  /v1/admin/indexer/tick:
+    post:
+      summary: Trigger one reorg-aware indexer poll cycle immediately
+      responses:
+        "200": { description: Tick result }
+  /v1/admin/reconcile:
+    post:
+      summary: Reconcile off-chain escrow records against on-chain `getAgreement` state
+      responses:
+        "200": { description: Reconciliation report }
+  /v1/admin/webhooks/tick:
+    post:
+      summary: Deliver due webhook events in the outbox
+      responses:
+        "200": { description: Delivery tick report }
+  /v1/admin/expire-reservations:
+    post:
+      summary: Release expired agent budget holds
+      responses:
+        "200": { description: Released count }

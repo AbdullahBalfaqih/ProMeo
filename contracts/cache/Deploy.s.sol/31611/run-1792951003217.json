@@ -1,0 +1,11 @@
+{
+  "transactions": [
+    {
+      "rpc": "https://rpc.test.mezo.org"
+    },
+    {
+      "rpc": "https://rpc.test.mezo.org"
+    }
+  ],
+  "recovery_generation": "0x28c345dad63db341199cb97d60c9ccba08b3698c40a71f7578949f1a41df5cdb"
+}

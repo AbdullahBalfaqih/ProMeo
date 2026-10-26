@@ -1,0 +1,380 @@
+{
+  "passed": 45,
+  "total": 45,
+  "results": [
+    {
+      "name": "API healthy",
+      "ok": true
+    },
+    {
+      "name": "RPC chain id matches",
+      "ok": true,
+      "info": {
+        "got": 31611
+      }
+    },
+    {
+      "name": "escrow contract has code",
+      "ok": true
+    },
+    {
+      "name": "two organizations bootstrapped",
+      "ok": true
+    },
+    {
+      "name": "approver user provisioned",
+      "ok": true
+    },
+    {
+      "name": "service manifest published with hash",
+      "ok": true
+    },
+    {
+      "name": "agent wallet authorized in registry",
+      "ok": true
+    },
+    {
+      "name": "agent token cannot manage policies",
+      "ok": true
+    },
+    {
+      "name": "agent token cannot approve",
+      "ok": true
+    },
+    {
+      "name": "agent created a draft request",
+      "ok": true,
+      "info": "REQ-2026-00001"
+    },
+    {
+      "name": "idempotent replay returns same request",
+      "ok": true
+    },
+    {
+      "name": "tampered offer hash rejected",
+      "ok": true
+    },
+    {
+      "name": "signed offer accepted",
+      "ok": true
+    },
+    {
+      "name": "discovery ranks the offer",
+      "ok": true
+    },
+    {
+      "name": "ranking is deterministic",
+      "ok": true
+    },
+    {
+      "name": "policy requires human approval above 500 MUSD",
+      "ok": true,
+      "info": {
+        "version": 1,
+        "decision": "REQUIRE_HUMAN_APPROVAL",
+        "matchedRules": [
+          {
+            "id": "large-request-needs-human",
+            "effect": "require_human_approval",
+            "description": "Orders above 500 MUSD require a human approver"
+          }
+        ],
+        "requiredRoles": [
+          "approver"
+        ]
+      }
+    },
+    {
+      "name": "approval queued for approver role",
+      "ok": true
+    },
+    {
+      "name": "requester cannot approve own request",
+      "ok": true
+    },
+    {
+      "name": "request approved after human decision",
+      "ok": true
+    },
+    {
+      "name": "agreement proposed",
+      "ok": true
+    },
+    {
+      "name": "fee is on top and read from contract",
+      "ok": true,
+      "info": {
+        "agreement": {
+          "id": "748a5aa3-8942-4d0e-823c-f181e2858d25",
+          "onchainId": "0x5f4a3c0d1b6b22a7381f6fbe2dda42d64c89cec9a2cb82fdf2b8a4784a0cf35e",
+          "orgId": "4cdcace0-b73c-4c0b-aeed-c5461b9d02ca",
+          "requestId": "e40fb59f-13d5-4579-ba22-c4c40dd01077",
+          "offerId": "089143ae-9bad-4acc-94a5-d54e3190e5fb",
+          "vendorId": "5abc4b8a-3583-4549-b58d-33b090109e92",
+          "chainId": 31611,
+          "escrowAddress": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+          "buyerAddress": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+          "vendorAddress": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+          "amount": "1200000000000000000000",
+          "feeAmount": "12000000000000000000",
+          "offerHash": "0x3fbcdef094caad79e60d1760e6b378d1e12843daf1145ce8d8efdd4a9887b1e4",
+          "termsHash": "0x6c868783a4dcdd13e5403eaf1c9b11238d5f2f485e9a704a280fefa47898e912",
+          "state": "proposed",
+          "acceptBy": "2026-10-28T13:49:48.448Z",
+          "deliverBy": "2026-11-05T13:49:48.448Z",
+          "disputeWindowSeconds": 604800,
+          "fundingTxHash": null,
+          "fundingBlock": null,
+          "acceptedAt": null,
+          "deliveredAt": null,
+          "releasedAt": null,
+          "disputeId": null,
+          "budgetReservationIds": [
+            "91a42218-9fea-4890-8b8f-f35753c8fce6",
+            "c20990f9-3759-4cad-9bd4-3ade40a68116",
+            "7b99c11b-005e-437a-8f88-f0891118ade8"
+          ],
+          "lastEventBlock": null,
+          "lastEventLogIndex": null,
+          "createdAt": "2026-10-25T13:49:48.444Z",
+          "updatedAt": "2026-10-25T13:49:48.444Z"
+        },
+        "fundingIntent": {
+          "chainId": 31611,
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "data": "0x44853ada000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266930d5f43629167964c7c248fe826e31d8bd9f0cf32ba9c894cb551227e89bc4b5dee9f4df7725ec318c9ddc225d6b4ec769cf09c7708cd290d5024c8ed53fe123fbcdef094caad79e60d1760e6b378d1e12843daf1145ce8d8efdd4a9887b1e46c868783a4dcdd13e5403eaf1c9b11238d5f2f485e9a704a280fefa47898e91200000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c80000000000000000000000000000000000000000000000410d586a20a4c00000000000000000000000000000000000000000000000000000000000006ae1fd7c000000000000000000000000000000000000000000000000000000006aec897c0000000000000000000000000000000000000000000000000000000000093a8000000000000000000000000000000000bb75707c8938f5aa99bbe42f42d21fc70000000000000000000000000000000000000000000000000000000000000001",
+          "value": "0",
+          "description": "Fund 1200000000000000000000 MUSD (+12000000000000000000 MUSD fee) into escrow 0x5f4a3c0d…",
+          "agreementId": "0x5f4a3c0d1b6b22a7381f6fbe2dda42d64c89cec9a2cb82fdf2b8a4784a0cf35e",
+          "nonce": "249175415440863910139650519877400272839"
+        },
+        "terms": {
+          "schemaVersion": 1,
+          "chainId": 31611,
+          "escrow": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "orgId": "4cdcace0-b73c-4c0b-aeed-c5461b9d02ca",
+          "requestId": "e40fb59f-13d5-4579-ba22-c4c40dd01077",
+          "requestReference": "REQ-2026-00001",
+          "offerId": "089143ae-9bad-4acc-94a5-d54e3190e5fb",
+          "offerHash": "0x3fbcdef094caad79e60d1760e6b378d1e12843daf1145ce8d8efdd4a9887b1e4",
+          "buyer": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+          "vendor": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+          "vendorId": "5abc4b8a-3583-4549-b58d-33b090109e92",
+          "amount": "1200000000000000000000",
+          "currency": "MUSD",
+          "description": "Weekly GPU capacity for model training",
+          "deliverables": {
+            "region": "eu-west",
+            "purpose": "model-training",
+            "capabilities": [
+              "gpu"
+            ]
+          },
+          "deadlines": {
+            "acceptBy": "2026-10-28T13:49:48.448Z",
+            "deliverBy": "2026-11-05T13:49:48.448Z"
+          },
+          "disputeWindowSeconds": 604800,
+          "createdAt": "2026-10-25T13:49:48.448Z",
+          "termsHash": "0x6c868783a4dcdd13e5403eaf1c9b11238d5f2f485e9a704a280fefa47898e912"
+        },
+        "amount": "1200",
+        "feeAmount": "12",
+        "totalAmount": "1212"
+      }
+    },
+    {
+      "name": "funding intent targets the escrow",
+      "ok": true
+    },
+    {
+      "name": "funding tx mined",
+      "ok": true
+    },
+    {
+      "name": "agreement projected as funded",
+      "ok": true
+    },
+    {
+      "name": "request moved to awarded",
+      "ok": true
+    },
+    {
+      "name": "indexer tick ran",
+      "ok": true,
+      "info": {
+        "processed": 15,
+        "applied": 3,
+        "from": 1,
+        "to": 25,
+        "targeted": true
+      }
+    },
+    {
+      "name": "agreement released",
+      "ok": true
+    },
+    {
+      "name": "request completed",
+      "ok": true
+    },
+    {
+      "name": "vendor received exactly the quoted amount",
+      "ok": true,
+      "info": {
+        "delta": "1200000000000000000000"
+      }
+    },
+    {
+      "name": "treasury received the 1% fee",
+      "ok": true,
+      "info": {
+        "delta": "12000000000000000000"
+      }
+    },
+    {
+      "name": "webhook deliveries were queued by earlier events",
+      "ok": true,
+      "info": {
+        "count": 2
+      }
+    },
+    {
+      "name": "receiver got at least one delivery",
+      "ok": true,
+      "info": {
+        "received": 2
+      }
+    },
+    {
+      "name": "HMAC signature verifies on a delivered event",
+      "ok": true
+    },
+    {
+      "name": "verified vendor under 500 MUSD auto-approved",
+      "ok": true,
+      "info": {
+        "version": 1,
+        "decision": "ALLOW",
+        "matchedRules": [
+          {
+            "id": "verified-vendor-auto",
+            "effect": "allow",
+            "description": "Verified vendors up to 500 MUSD may proceed automatically"
+          }
+        ],
+        "requiredRoles": []
+      }
+    },
+    {
+      "name": "resolver key submitted the ruling on-chain",
+      "ok": true,
+      "info": {
+        "dispute": {
+          "id": "bc3ef369-3d08-4b19-889b-33ca8456eede",
+          "orgId": "4cdcace0-b73c-4c0b-aeed-c5461b9d02ca",
+          "agreementId": "b531c6d5-015e-4328-b766-f05891b3b0c7",
+          "openedBy": "9e303191-1e8f-43be-b97d-ee7b64d019a5",
+          "reason": "Delivered benchmark ran 40% below contractual throughput",
+          "evidence": {
+            "p95": "410 tok/s",
+            "expected": "700 tok/s",
+            "evidenceHash": "0xf2e1b185771c6e617624eb62fd8f92a424106d28eecea6361301bd7f40973fdd"
+          },
+          "status": "resolved",
+          "vendorShare": "240000000000000000000",
+          "rulingHash": "0xca67eff71f22f684b233deaad45f4997a6fd4e6749753ec18888901825905a69",
+          "resolvedByUserId": "9e303191-1e8f-43be-b97d-ee7b64d019a5",
+          "resolutionNote": "60/40 split per SLA schedule",
+          "resolutionTxHash": "0xcee06221b34512bfa8a4cc0aaa3bb2fe84dd0fa171d9f584706a59817b370453",
+          "resolvedAt": "2026-10-25T13:50:13.299Z",
+          "createdAt": "2026-10-25T13:50:09.215Z",
+          "updatedAt": "2026-10-25T13:50:13.299Z"
+        },
+        "txHash": "0xcee06221b34512bfa8a4cc0aaa3bb2fe84dd0fa171d9f584706a59817b370453",
+        "rulingHash": "0xca67eff71f22f684b233deaad45f4997a6fd4e6749753ec18888901825905a69",
+        "onchainIntent": null
+      }
+    },
+    {
+      "name": "dispute recorded as resolved",
+      "ok": true
+    },
+    {
+      "name": "disputed agreement settled",
+      "ok": true
+    },
+    {
+      "name": "agreement blocked by agent budget",
+      "ok": true,
+      "info": {
+        "error": {
+          "code": "budget_exceeded",
+          "message": "per-request limit exceeded: 3535000000000000000000 > 3000000000000000000000",
+          "details": {
+            "window": "per_request",
+            "limit": "3000000000000000000000"
+          },
+          "requestId": "5bec7cca-611b-4a9c-96d8-f4ddd3869a1c"
+        }
+      }
+    },
+    {
+      "name": "tenant isolation on request reads",
+      "ok": true
+    },
+    {
+      "name": "tenant isolation on agreement reads",
+      "ok": true
+    },
+    {
+      "name": "policy simulation denies unverified vendor above 1,000",
+      "ok": true,
+      "info": [
+        {
+          "id": "unverified-vendor-large",
+          "effect": "deny",
+          "description": "Unverified vendors may not receive more than 1,000 MUSD"
+        },
+        {
+          "id": "large-request-needs-human",
+          "effect": "require_human_approval",
+          "description": "Orders above 500 MUSD require a human approver"
+        }
+      ]
+    },
+    {
+      "name": "budget spent reflects captured escrow",
+      "ok": true,
+      "info": {
+        "id": "ed42c44a-bba1-4516-861f-6e89f0839249",
+        "window": "monthly",
+        "limit": "20000000000000000000000",
+        "limitDisplay": "20000",
+        "spent": "1212000000000000000000",
+        "spentDisplay": "1212",
+        "reserved": "0",
+        "reservedDisplay": "0",
+        "periodStart": "2026-10-01T00:00:00.000Z",
+        "periodEnd": "2026-11-01T00:00:00.000Z"
+      }
+    },
+    {
+      "name": "per-request limit preserved",
+      "ok": true
+    },
+    {
+      "name": "audit hash chain verifies",
+      "ok": true,
+      "info": {
+        "valid": true,
+        "checked": 33,
+        "head": "c6771c9143503b2a9ae9eca441b21de0e5f5709422a1539b2735ddd1a5b145bc"
+      }
+    },
+    {
+      "name": "audit log is tenant scoped",
+      "ok": true
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "generatedAt": "2026-10-17",
+  "note": "Cross-language conformance vectors for RFC 8785-style canonical JSON and keccak256 domain hashing. Server and SDK tests must both reproduce these exactly.",
+  "canonical": [
+    {
+      "name": "simple",
+      "input": {
+        "b": 2,
+        "a": 1
+      },
+      "canonical": "{\"a\":1,\"b\":2}"
+    },
+    {
+      "name": "nested",
+      "input": {
+        "z": {
+          "y": [
+            3,
+            2,
+            1
+          ],
+          "x": null
+        },
+        "a": true
+      },
+      "canonical": "{\"a\":true,\"z\":{\"x\":null,\"y\":[3,2,1]}}"
+    },
+    {
+      "name": "money-strings",
+      "input": {
+        "amount": "1200000000000000000000",
+        "currency": "MUSD"
+      },
+      "canonical": "{\"amount\":\"1200000000000000000000\",\"currency\":\"MUSD\"}"
+    },
+    {
+      "name": "unicode",
+      "input": {
+        "note": "دفعة مقابل خدمات GPU — 8×H100",
+        "emoji": "✅"
+      },
+      "canonical": "{\"emoji\":\"✅\",\"note\":\"دفعة مقابل خدمات GPU — 8×H100\"}"
+    },
+    {
+      "name": "arrays",
+      "input": {
+        "list": [
+          1,
+          "two",
+          false,
+          null,
+          {
+            "k": "v"
+          }
+        ]
+      },
+      "canonical": "{\"list\":[1,\"two\",false,null,{\"k\":\"v\"}]}"
+    },
+    {
+      "name": "escapes",
+      "input": {
+        "text": "quote\" backslash\\ newline\n tab\t"
+      },
+      "canonical": "{\"text\":\"quote\\\" backslash\\\\ newline\\n tab\\t\"}"
+    }
+  ],
+  "hashes": [
+    {
+      "name": "simple",
+      "domain": "apn.offer.v1",
+      "input": {
+        "b": 2,
+        "a": 1
+      },
+      "hash": "0xb2c6214b4b4365b89d9f1d5ea99e8dec142f90ffe03b036ca7de7ef76ed42813"
+    },
+    {
+      "name": "nested",
+      "domain": "apn.offer.v1",
+      "input": {
+        "z": {
+          "y": [
+            3,
+            2,
+            1
+          ],
+          "x": null
+        },
+        "a": true
+      },
+      "hash": "0xe075547b34d9c6c652ba91edc9827f795a4a0fbe8ce163e9ff9279c3bb63d6d3"
+    },
+    {
+      "name": "money-strings",
+      "domain": "apn.offer.v1",
+      "input": {
+        "amount": "1200000000000000000000",
+        "currency": "MUSD"
+      },
+      "hash": "0xc401b95b9d7d8bf1d5c895cba612240c07171ad8cbc83caa60678a213cfd1d73"
+    },
+    {
+      "name": "unicode",
+      "domain": "apn.offer.v1",
+      "input": {
+        "note": "دفعة مقابل خدمات GPU — 8×H100",
+        "emoji": "✅"
+      },
+      "hash": "0xcd3d186afc47fc0dea08588a8fffc1b9d38a68b38079f6f212a74e853e53aeb9"
+    },
+    {
+      "name": "arrays",
+      "domain": "apn.offer.v1",
+      "input": {
+        "list": [
+          1,
+          "two",
+          false,
+          null,
+          {
+            "k": "v"
+          }
+        ]
+      },
+      "hash": "0xa1eeabbf10e86cdfbc5f8fe6309127df64a7f427f72236c38c3cbce8b6ae88da"
+    },
+    {
+      "name": "escapes",
+      "domain": "apn.offer.v1",
+      "input": {
+        "text": "quote\" backslash\\ newline\n tab\t"
+      },
+      "hash": "0xd782cfc0a5643593d84a40169fe3fe97816e242d384164fb9d6fb2affdc4580d"
+    }
+  ]
+}

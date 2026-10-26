@@ -1,0 +1,115 @@
+name: Agent Procurement Network CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  contracts:
+    name: Foundry (Unit + Fuzz + Invariant)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+      - name: Check formatting
+        run: forge fmt --check
+      - name: Build contracts
+        run: forge build --sizes
+      - name: Run unit, fuzz, and stateful invariant tests
+        run: forge test -vvv
+
+  server-and-sdk:
+    name: Control Plane & SDK (Typecheck + Vitest + E2E)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: apn
+          POSTGRES_PASSWORD: apn_dev_password
+          POSTGRES_DB: apn
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Foundry (for Anvil E2E chain)
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+      - name: Create test database
+        env:
+          PGPASSWORD: apn_dev_password
+        run: psql -h 127.0.0.1 -U apn -d apn -c "CREATE DATABASE apn_test OWNER apn;"
+      - name: Install & test @apn/sdk
+        working-directory: packages/sdk
+        run: |
+          npm install
+          npm run typecheck
+          npm test
+      - name: Install, typecheck & test @apn/server
+        working-directory: server
+        run: |
+          npm install
+          npm run typecheck
+          npm test
+      - name: Full on-chain + off-chain E2E suite against Anvil
+        working-directory: server
+        env:
+          DATABASE_URL: postgres://apn:apn_dev_password@127.0.0.1:5432/apn
+          NODE_ENV: development
+          PORT: "4000"
+          HOST: 127.0.0.1
+          LOG_LEVEL: warn
+          PUBLIC_BASE_URL: http://127.0.0.1:4000
+          CORS_ORIGINS: http://localhost:3000
+          RATE_LIMIT_PER_MINUTE: "10000"
+          MEZO_CHAIN_ID: "31611"
+          MEZO_RPC_URL: http://127.0.0.1:8545
+          MEZO_EXPLORER_URL: https://explorer.test.mezo.org
+          ESCROW_CONTRACT_ADDRESS: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+          REGISTRY_CONTRACT_ADDRESS: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+          MUSD_ADDRESS: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+          RESOLVER_PRIVATE_KEY: "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6"
+          INDEXER_ENABLED: "true"
+          INDEXER_CONFIRMATIONS: "0"
+          SECRET_ENCRYPTION_KEY: "2abaf3632f39ec622d6f0b2ee0052fc65bf987c72df2ab5a76e9b7b88f20215a"
+          ALLOW_BOOTSTRAP: "true"
+        run: |
+          anvil --host 127.0.0.1 --port 8545 --chain-id 31611 &
+          sleep 2
+          cd ../contracts
+          PK=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+          forge create test/mocks/MockMUSD.sol:MockMUSD --rpc-url http://127.0.0.1:8545 --private-key "$PK" --broadcast
+          PRIVATE_KEY="$PK" MUSD_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3 REGISTRY_ADMIN=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 FEE_RECIPIENT=0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65 FEE_BPS=100 NETWORK=local-anvil TEST_DOUBLE_MUSD=true EXPECTED_CHAIN_ID=31611 forge script script/Deploy.s.sol --rpc-url http://127.0.0.1:8545 --broadcast
+          cast send 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 "grantRole(bytes32,address)" "$(cast keccak RESOLVER_ROLE)" 0x90F79bf6EB2c4f870365E785982E1f101E93b906 --rpc-url http://127.0.0.1:8545 --private-key "$PK"
+          cd ../server
+          npm run db:migrate
+          nohup npm start > /tmp/apn-server.log 2>&1 &
+          sleep 3
+          npm run e2e
+
+  landing-page:
+    name: Next.js Landing Page Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run build
