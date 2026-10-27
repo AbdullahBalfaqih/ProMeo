@@ -19,12 +19,16 @@ const nextConfig = {
     return config;
   },
   async rewrites() {
-    return [
-      { source: '/console', destination: 'http://127.0.0.1:4000/console' },
-      { source: '/admin', destination: 'http://127.0.0.1:4000/admin' },
-      { source: '/healthz', destination: 'http://127.0.0.1:4000/healthz' },
-      { source: '/v1/:path*', destination: 'http://127.0.0.1:4000/v1/:path*' },
-    ];
+    const backend = process.env.BACKEND_URL;
+    if (backend) {
+      return [
+        { source: '/console', destination: `${backend}/console` },
+        { source: '/admin', destination: `${backend}/admin` },
+        { source: '/healthz', destination: `${backend}/healthz` },
+        { source: '/v1/:path*', destination: `${backend}/v1/:path*` },
+      ];
+    }
+    return [];
   },
 };
 

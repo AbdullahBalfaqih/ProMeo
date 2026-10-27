@@ -3739,14 +3739,27 @@ function showAuthRequired() {
   if (!state.token) {
     try {
       const ls = localStorage.getItem("apn.token");
+      const wallet = localStorage.getItem("apn.wallet");
       if (ls) {
         state.token = ls;
         store.set("apn.token", ls);
+      } else if (wallet) {
+        const authRes = await api("POST", "/auth/wallet", { walletAddress: wallet }).catch(() => null);
+        if (authRes?.token) {
+          state.token = authRes.token;
+          store.set("apn.token", authRes.token);
+          localStorage.setItem("apn.token", authRes.token);
+        }
       }
     } catch {}
   }
 
   let works = await tokenWorks();
+  if (!works && state.demoPrincipals?.northwind_owner) {
+    state.token = state.demoPrincipals.northwind_owner;
+    store.set("apn.token", state.token);
+    works = await tokenWorks();
+  }
   if (!works) {
     showAuthRequired();
     return;

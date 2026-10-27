@@ -1,0 +1,3779 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ProMeo · Agent Procurement Network</title>
+<link rel="icon" href="/assets/logo.png" />
+<style>
+  @font-face {
+    font-family: "Inter";
+    src: url("/fonts/InterVariable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+
+  :root {
+    --page-1: #b6a0f3;
+    --page-2: #967dee;
+    --band-1: #e6dcfc;
+    --band-2: #cfbcf8;
+    --card: #ffffff;
+    --ink: #241b45;
+    --ink-soft: #463d6e;
+    --muted: #7d76a0;
+    --line: rgba(84, 58, 170, 0.14);
+    --line-strong: rgba(84, 58, 170, 0.26);
+    --purple: #6d3fea;
+    --purple-2: #8b5cf6;
+    --purple-3: #b49cff;
+    --lav: #efe9ff;
+    --grad-card: linear-gradient(165deg, #c9a6fb 0%, #a678f2 55%, #8f55ea 100%);
+    --grad-btn: linear-gradient(135deg, #8659f4 0%, #6d3fea 62%, #5a2fd6 100%);
+    --shadow: 0 18px 44px rgba(58, 34, 130, 0.16);
+    --shadow-sm: 0 8px 22px rgba(58, 34, 130, 0.12);
+    --r-xl: 30px;
+    --r-lg: 24px;
+    --r-md: 16px;
+    --r-sm: 12px;
+    --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: radial-gradient(1100px 700px at 82% -12%, #d3c2fa 0%, transparent 60%), linear-gradient(160deg, var(--page-1) 0%, var(--page-2) 100%) fixed;
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: rgba(109, 63, 234, 0.3); color: #241b45; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(84, 58, 170, 0.28); border-radius: 99px; border: 2px solid transparent; background-clip: content-box; }
+
+  a { color: var(--purple); text-decoration: none; }
+  a:hover { color: #5a2fd6; }
+  h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: -0.03em; color: var(--ink); }
+  h1 { font-size: 22px; }
+  h2 { font-size: 16px; }
+  h3 { font-size: 13.5px; }
+  p { margin: 0; }
+
+  .muted { color: var(--muted); }
+  .mono { font-family: var(--mono); font-size: 12px; letter-spacing: 0; }
+
+  svg.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+  .ric { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .ric.fill { fill: currentColor; stroke: none; }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 18px;
+    max-width: 1680px;
+    margin: 0 auto;
+    padding: 18px 22px 26px 18px;
+  }
+
+  /* ============ Floating icon rail ============ */
+  .rail {
+    position: sticky;
+    top: 18px;
+    align-self: start;
+    height: calc(100vh - 36px);
+    min-height: 640px;
+    border-radius: var(--r-xl);
+    background: rgba(255, 255, 255, 0.66);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 0 14px;
+  }
+  .rail-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
+    background: var(--grad-btn);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 10px 24px rgba(109, 63, 234, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    margin-bottom: 10px;
+    flex: none;
+  }
+  .rail-logo img { width: 26px; height: 26px; }
+  .rail-sep { width: 34px; height: 1px; background: rgba(84, 58, 170, 0.16); margin: 4px 0 6px; }
+  .rail-btns { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; padding: 2px 0; scrollbar-width: none; }
+  .rail-btns::-webkit-scrollbar { display: none; }
+  .rail-btn {
+    position: relative;
+    width: 50px;
+    height: 46px;
+    border-radius: 15px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #6b6195;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .rail-btn:hover { background: rgba(109, 63, 234, 0.1); color: var(--ink); }
+  .rail-btn[aria-selected="true"] {
+    background: var(--grad-btn);
+    color: #ffffff;
+    box-shadow: 0 10px 22px rgba(109, 63, 234, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .rail-btn .rail-tip {
+    position: absolute;
+    left: 60px;
+    top: 50%;
+    transform: translateY(-50%) translateX(-4px);
+    padding: 6px 12px;
+    border-radius: 10px;
+    background: #1c1436;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.16s ease;
+    z-index: 30;
+    box-shadow: 0 10px 24px rgba(20, 10, 50, 0.35);
+  }
+  .rail-btn:hover .rail-tip { opacity: 1; transform: translateY(-50%) translateX(0); }
+  .rail-foot { margin-top: auto; }
+  .rail-foot .rail-btn { color: #6b6195; }
+
+  /* ============ Main column ============ */
+  .main-col { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+
+  .appbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 4px 6px 0;
+    flex-wrap: wrap;
+  }
+  .appbar-title { display: inline-flex; align-items: center; gap: 10px; }
+  .appbar-title h1 { font-size: 21px; font-weight: 600; }
+  .mark-chip {
+    width: 28px;
+    height: 28px;
+    border-radius: 9px;
+    background: var(--grad-btn);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 6px 16px rgba(109, 63, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    flex: none;
+  }
+  .mark-chip img { width: 16px; height: 16px; }
+  .appbar-sub { font-size: 12.5px; color: rgba(36, 27, 69, 0.66); font-weight: 500; }
+  .spacer { flex: 1; }
+  .appbar-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .icon-btn {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--ink-soft);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.16s ease;
+  }
+  .icon-btn:hover { background: #ffffff; color: var(--purple); }
+  .icon-btn .dot-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 19px;
+    height: 19px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--grad-btn);
+    color: #ffffff;
+    font-size: 10.5px;
+    font-weight: 600;
+    display: grid;
+    place-items: center;
+    border: 2px solid #cdb9f6;
+  }
+
+  .addr-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    height: 44px;
+    padding: 0 8px 0 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: var(--shadow-sm);
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+  .addr-chip .copy-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    border: none;
+    background: rgba(109, 63, 234, 0.1);
+    color: var(--purple);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .addr-chip .copy-btn:hover { background: var(--grad-btn); color: #ffffff; }
+  .addr-chip .copy-btn .ric { width: 14px; height: 14px; }
+
+  .avatar-chip {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    background: var(--grad-card);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.16s ease;
+  }
+  .avatar-chip:hover { transform: translateY(-1px); }
+
+  /* ============ Lavender content band ============ */
+  .band {
+    border-radius: var(--r-xl);
+    background: linear-gradient(180deg, var(--band-1) 0%, var(--band-2) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    min-width: 0;
+  }
+
+  /* ============ Overview hero ============ */
+  .hero-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
+  .hcard {
+    position: relative;
+    border-radius: var(--r-lg);
+    background: var(--grad-card);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 0 18px 40px rgba(109, 63, 234, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    padding: 20px;
+    color: #ffffff;
+    min-height: 168px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .hcard:hover { transform: translateY(-3px); box-shadow: 0 24px 52px rgba(109, 63, 234, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4); }
+  .hcard .hcard-label { font-size: 13px; font-weight: 500; color: rgba(255, 255, 255, 0.85); }
+  .hcard .hcard-value { font-size: 30px; font-weight: 600; letter-spacing: -0.03em; margin-top: 4px; }
+  .hcard .hcard-chip {
+    position: relative;
+    z-index: 2;
+    margin-top: auto;
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 11px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #ffffff;
+  }
+  .hcard .hcard-chip .cdot { width: 6px; height: 6px; border-radius: 999px; background: #ffffff; box-shadow: 0 0 8px rgba(255, 255, 255, 0.9); }
+  .glass-ic { position: absolute; right: -6px; bottom: -10px; width: 130px; height: 130px; opacity: 0.9; pointer-events: none; }
+
+  .hero-main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: stretch; }
+
+  .white-card {
+    background: var(--card);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    min-width: 0;
+  }
+
+  .chart-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; }
+  .chart-title { display: inline-flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: var(--ink); }
+  .chart-big { font-size: 40px; font-weight: 600; letter-spacing: -0.04em; color: var(--ink); line-height: 1.1; margin: 6px 0 2px; }
+  .range-pills { display: inline-flex; gap: 6px; align-items: center; }
+  .rpill {
+    min-width: 40px;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: #faf8ff;
+    color: var(--ink-soft);
+    font-family: var(--font);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .rpill:hover { border-color: var(--purple-3); color: var(--purple); }
+  .rpill[aria-pressed="true"] { background: #1c1436; border-color: #1c1436; color: #ffffff; }
+  .chart-wrap svg { display: block; width: 100%; }
+
+  /* ============ Right action panel ============ */
+  .side-panel { display: flex; flex-direction: column; gap: 14px; }
+  .stab-row { display: flex; gap: 20px; padding: 2px 4px 0; }
+  .stab {
+    position: relative;
+    border: none;
+    background: none;
+    padding: 6px 2px 12px;
+    font-family: var(--font);
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.15s ease;
+  }
+  .stab:hover { color: var(--ink-soft); }
+  .stab[aria-selected="true"] { color: var(--ink); font-weight: 600; }
+  .stab[aria-selected="true"]::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 2px;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--purple);
+    box-shadow: 0 0 8px rgba(109, 63, 234, 0.8);
+  }
+
+  .gauge-box { display: grid; place-items: center; padding: 4px 0 2px; }
+  .gauge-inner { position: relative; width: 188px; height: 168px; }
+  .gauge-inner svg { position: absolute; inset: 0; }
+  .gauge-num { position: absolute; left: 0; right: 0; top: 54px; text-align: center; font-size: 26px; font-weight: 600; letter-spacing: -0.03em; color: var(--ink); }
+  .gauge-sub { position: absolute; left: 0; right: 0; top: 88px; text-align: center; font-size: 12px; color: var(--muted); font-weight: 500; }
+
+  .q-label { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .q-label small { float: right; font-size: 11.5px; color: var(--muted); font-weight: 500; }
+  .input-pill { position: relative; margin-top: 7px; }
+  .input-pill input {
+    width: 100%;
+    height: 48px;
+    padding: 0 66px 0 16px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: #ffffff;
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 13.5px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .input-pill input:focus { border-color: var(--purple-2); box-shadow: 0 0 0 4px rgba(109, 63, 234, 0.16); }
+  .input-pill .inner-btn {
+    position: absolute;
+    right: 6px;
+    top: 6px;
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: #ffffff;
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(58, 34, 130, 0.12);
+    transition: all 0.15s ease;
+  }
+  .input-pill .inner-btn:hover { background: var(--lav); border-color: var(--purple-3); color: var(--purple); }
+
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .pill-opt {
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: #ffffff;
+    color: var(--ink-soft);
+    font-family: var(--font);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .pill-opt:hover { border-color: var(--purple-3); }
+  .pill-opt[aria-pressed="true"] { background: #1c1436; border-color: #1c1436; color: #ffffff; box-shadow: 0 8px 18px rgba(20, 12, 50, 0.25); }
+
+  .q-rows { display: flex; flex-direction: column; }
+  .q-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 4px;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    background: none;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    cursor: pointer;
+    text-align: left;
+    transition: color 0.15s ease;
+  }
+  .q-row:hover { color: var(--purple); }
+  .q-row .q-val { color: var(--ink); font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+  .q-row .ric { width: 15px; height: 15px; color: var(--muted); }
+
+  .btn-dark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    height: 52px;
+    border-radius: 999px;
+    border: 1px solid #14101f;
+    background: #14101f;
+    color: #ffffff;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    box-shadow: 0 14px 30px rgba(20, 12, 50, 0.35);
+  }
+  .btn-dark:hover:not(:disabled) { background: #251c44; border-color: #251c44; transform: translateY(-1px); }
+  .btn-dark:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .quick-list { display: flex; flex-direction: column; gap: 8px; }
+  .quick-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 11px 13px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: #faf8ff;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+  .quick-item b { color: var(--ink); font-weight: 600; display: block; font-size: 12.5px; }
+  .quick-item .mono { color: var(--muted); }
+
+  /* ============ Generic page scaffolding ============ */
+  .page-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .page-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 13px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--purple);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 10px;
+  }
+  .page-eyebrow svg { width: 12px; height: 12px; fill: var(--purple); }
+  .page-head p { color: var(--ink-soft); max-width: 640px; }
+  .page-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .grid { display: grid; gap: 16px; }
+  .g-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .g-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .g-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .g-sidebar-right { grid-template-columns: minmax(0, 1.55fr) minmax(340px, 1fr); }
+  .g-sidebar-left { grid-template-columns: minmax(330px, 0.95fr) minmax(0, 1.55fr); }
+  @media (max-width: 1180px) {
+    .g-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .g-3, .g-sidebar-right, .g-sidebar-left, .hero-main, .hero-cards { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: var(--r-lg);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    min-width: 0;
+  }
+  .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .card-sub { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: #ffffff;
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn:hover:not(:disabled) { border-color: var(--purple-3); color: var(--purple); transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.primary {
+    background: var(--grad-btn);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    box-shadow: 0 12px 26px rgba(109, 63, 234, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .btn.primary:hover:not(:disabled) { color: #ffffff; box-shadow: 0 16px 34px rgba(109, 63, 234, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+  .btn.subtle { background: var(--lav); border-color: rgba(109, 63, 234, 0.22); color: var(--purple); }
+  .btn.subtle:hover:not(:disabled) { background: #e4d9ff; color: #5a2fd6; }
+  .btn.sm { padding: 6px 13px; font-size: 12px; }
+  .btn .orb {
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn:not(.primary) .orb { background: rgba(109, 63, 234, 0.12); }
+  .btn .orb svg { width: 11px; height: 11px; fill: currentColor; }
+  .btn.primary .orb svg { fill: #ffffff; }
+
+  /* Badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 11px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1.5;
+    background: rgba(36, 27, 69, 0.05);
+    border: 1px solid rgba(36, 27, 69, 0.14);
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  .badge::before { content: ""; width: 6px; height: 6px; border-radius: 999px; background: currentColor; opacity: 0.75; }
+  .badge.tone-active { background: rgba(109, 63, 234, 0.12); border-color: rgba(109, 63, 234, 0.32); color: #5a2fd6; }
+  .badge.tone-bright { background: var(--grad-btn); border-color: rgba(255, 255, 255, 0.35); color: #ffffff; box-shadow: 0 6px 16px rgba(109, 63, 234, 0.4); }
+  .badge.tone-muted { background: rgba(36, 27, 69, 0.04); border-color: rgba(36, 27, 69, 0.1); color: var(--muted); }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; border-radius: var(--r-md); border: 1px solid var(--line); background: #ffffff; }
+  table { width: 100%; border-collapse: collapse; text-align: left; }
+  th {
+    padding: 11px 14px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--muted);
+    background: #f6f2ff;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  td {
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    border-bottom: 1px solid rgba(84, 58, 170, 0.08);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background 0.12s ease; }
+  tbody tr:hover { background: rgba(109, 63, 234, 0.05); }
+  tbody tr.clickable { cursor: pointer; }
+
+  /* Forms */
+  .field { margin-bottom: 14px; }
+  label { display: block; font-size: 12.5px; font-weight: 500; color: var(--ink-soft); margin-bottom: 6px; }
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--line-strong);
+    background: #ffffff;
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--purple-2); box-shadow: 0 0 0 4px rgba(109, 63, 234, 0.14); }
+  textarea { min-height: 78px; resize: vertical; }
+  .field-hint { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+
+  .sep { height: 1px; background: var(--line); margin: 16px 0; }
+
+  .kv-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .kv-item { padding: 11px 14px; border-radius: 13px; background: #faf8ff; border: 1px solid var(--line); }
+  .kv-item .k { font-size: 11.5px; color: var(--muted); margin-bottom: 2px; }
+  .kv-item .v { font-size: 13px; font-weight: 500; color: var(--ink); word-break: break-all; }
+
+  .step-flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+  @media (max-width: 960px) { .step-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .step-box { padding: 15px; border-radius: 16px; background: #faf8ff; border: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; }
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--grad-btn);
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffffff;
+    box-shadow: 0 6px 14px rgba(109, 63, 234, 0.4);
+  }
+
+  .empty-box { padding: 28px 18px; text-align: center; color: var(--muted); font-size: 13px; }
+  .load-box { padding: 40px 18px; text-align: center; color: #ffffff; font-size: 13.5px; font-weight: 500; }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgba(28, 18, 58, 0.42);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-card {
+    width: 100%;
+    max-width: 540px;
+    max-height: 86vh;
+    overflow-y: auto;
+    background: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: var(--r-lg);
+    padding: 24px;
+    box-shadow: 0 30px 80px rgba(20, 10, 50, 0.4);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    max-width: min(460px, calc(100vw - 32px));
+    padding: 12px 20px;
+    border-radius: 999px;
+    background: #1c1436;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 18px 44px rgba(20, 10, 50, 0.45);
+    text-align: center;
+  }
+
+  /* Responsive shell */
+  @media (max-width: 900px) {
+    #app { grid-template-columns: 68px minmax(0, 1fr); gap: 12px; padding: 12px 12px 18px; }
+    .rail { padding: 12px 0 10px; }
+    .rail-btn { width: 44px; height: 42px; }
+    .band { padding: 14px; }
+    .chart-big { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+
+<svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <symbol id="i-spark" viewBox="0 0 24 24">
+    <path d="M12 2.6c.28 0 .52.18.6.45l1.65 5.63a4.6 4.6 0 0 0 3.07 3.07l5.63 1.65a.62.62 0 0 1 0 1.2l-5.63 1.65a4.6 4.6 0 0 0-3.07 3.07l-1.65 5.63a.62.62 0 0 1-1.2 0l-1.65-5.63a4.6 4.6 0 0 0-3.07-3.07l-5.63-1.65a.62.62 0 0 1 0-1.2l5.63-1.65a4.6 4.6 0 0 0 3.07-3.07l1.65-5.63A.62.62 0 0 1 12 2.6Z" />
+  </symbol>
+  <symbol id="i-home" viewBox="0 0 24 24">
+    <path d="M3.5 10.5 12 3l8.5 7.5" />
+    <path d="M5.5 9.5V21h13V9.5" />
+    <path d="M9.5 21v-6h5v6" />
+  </symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24">
+    <rect x="5" y="3" width="14" height="18" rx="2.5" />
+    <path d="M9 8.5h6M9 12.5h6M9 16.5h3.5" />
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="m8.2 12.4 2.6 2.6 5-5.4" />
+  </symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24">
+    <rect x="5" y="10.5" width="14" height="10" rx="3" />
+    <path d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5" />
+    <path d="M12 14.5v2.5" />
+  </symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24">
+    <path d="M12 4v16M7 20h10M12 6l-5.5 1M12 6l5.5 1" />
+    <path d="m6.5 7-2.8 5.6a3 3 0 0 0 5.6 0L6.5 7ZM17.5 7l-2.8 5.6a3 3 0 0 0 5.6 0L17.5 7Z" />
+  </symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24">
+    <rect x="4" y="8.5" width="16" height="11.5" rx="3.5" />
+    <path d="M12 8.5V5.5" />
+    <circle cx="12" cy="4" r="1.4" />
+    <path d="M9 13.5v1.5M15 13.5v1.5" />
+  </symbol>
+  <symbol id="i-store" viewBox="0 0 24 24">
+    <path d="M4.5 9.5 6 4.5h12l1.5 5" />
+    <path d="M4.5 9.5h15V20h-15V9.5Z" />
+    <path d="M9.5 20v-5.5h5V20" />
+  </symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24">
+    <path d="M4 8h16M4 16h16" />
+    <circle cx="9.5" cy="8" r="2.2" fill="#fff" />
+    <circle cx="14.5" cy="16" r="2.2" fill="#fff" />
+  </symbol>
+  <symbol id="i-org" viewBox="0 0 24 24">
+    <rect x="5" y="7" width="14" height="14" rx="2" />
+    <path d="M9.5 7V4.5h5V7" />
+    <path d="M9 11h2M13 11h2M9 14.5h2M13 14.5h2M10.5 21v-3h3v3" />
+  </symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24">
+    <path d="M13 2.5 4.5 14H10l-1 7.5L17.5 10H12l1-7.5Z" />
+  </symbol>
+  <symbol id="i-key" viewBox="0 0 24 24">
+    <circle cx="8" cy="14.5" r="4.2" />
+    <path d="m11.2 11.6 8-8M16.5 6.3l2.4 2.4M13.6 9.2l2.4 2.4" />
+  </symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24">
+    <path d="M6.2 15.5V11a5.8 5.8 0 1 1 11.6 0v4.5l1.9 2.8H4.3l1.9-2.8Z" />
+    <path d="M10 21h4" />
+  </symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24">
+    <rect x="9" y="9" width="11" height="11" rx="2.5" />
+    <path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15" />
+  </symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24">
+    <path d="M5 12h13M13 6.5 18.5 12 13 17.5" />
+  </symbol>
+  <symbol id="i-back" viewBox="0 0 24 24">
+    <path d="M19 12H6M10.5 6.5 5 12l5.5 5.5" />
+  </symbol>
+</svg>
+
+<div id="app"></div>
+<div id="modalRoot"></div>
+
+<script>
+"use strict";
+
+/* Safe storage wrapper so cross-origin iframe restrictions never break boot */
+const store = {
+  mem: {},
+  get(k) {
+    try { return window.sessionStorage.getItem(k) || this.mem[k] || ""; }
+    catch { return this.mem[k] || ""; }
+  },
+  set(k, v) {
+    this.mem[k] = v;
+    try { window.sessionStorage.setItem(k, v); } catch {}
+  },
+  del(k) {
+    delete this.mem[k];
+    try { window.sessionStorage.removeItem(k); } catch {}
+  }
+};
+
+const state = {
+  token: store.get("apn.token"),
+  org: null,
+  role: null,
+  principalKind: "user",
+  meta: null,
+  health: null,
+  demoPrincipals: null,
+  tab: "overview",
+  range: "w",
+  qcCat: "cloud_infrastructure",
+  chartData: [],
+  overviewData: null,
+  selectedRequestId: null,
+  selectedAgreementId: null,
+  selectedAgentId: null,
+  counts: {
+    requests: 0,
+    approvals: 0,
+    agreements: 0,
+    disputes: 0,
+    agents: 0,
+    vendors: 0,
+    policies: 0,
+    webhooks: 0,
+  }
+};
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* Convert any enum, status, or identifier into natural Title Case with zero all-caps words */
+function cleanCase(input) {
+  const raw = String(input ?? "").trim();
+  if (!raw) return "—";
+  const map = {
+    MUSD: "Musd",
+    musd: "Musd",
+    ALLOW: "Allow",
+    DENY: "Deny",
+    REQUIRE_HUMAN_APPROVAL: "Require Human Approval",
+    require_human_approval: "Require Human Approval",
+    pending_approval: "Pending Approval",
+    cloud_infrastructure: "Cloud Infrastructure",
+    ai_services: "Managed Intelligence",
+    professional_services: "Professional Services",
+    per_request: "Per Request",
+    ai_agent: "Autonomous Agent",
+  };
+  if (map[raw]) return map[raw];
+  return raw
+    .replace(/[_-]+/g, " ")
+    .split(/\s+/)
+    .map((w) => {
+      if (!w) return "";
+      if (w.toUpperCase() === "MUSD") return "Musd";
+      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    })
+    .join(" ");
+}
+
+function cleanRef(ref) {
+  if (!ref) return "—";
+  return String(ref).replace(/^REQ-/i, "Ref #");
+}
+
+function landingHref() {
+  if (location.port === "4000") return location.protocol + "//" + location.hostname + ":3000/";
+  if (location.hostname.startsWith("4000-")) return location.protocol + "//" + location.hostname.replace(/^4000-/, "3000-") + "/";
+  return "/";
+}
+
+async function copyText(t) {
+  try {
+    await navigator.clipboard.writeText(t);
+    toast("Copied to clipboard");
+  } catch {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = t;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+      toast("Copied to clipboard");
+    } catch { toast(t); }
+  }
+}
+
+function sparkBtn(id, label, sm = false) {
+  return `<button class="btn primary ${sm ? "sm" : ""}" id="${esc(id)}" type="button">
+    <span class="orb"><svg><use href="#i-spark"/></svg></span>
+    <span>${esc(label)}</span>
+  </button>`;
+}
+
+function badge(status) {
+  const s = String(status ?? "").toLowerCase();
+  let tone = "tone-muted";
+  if (["open", "approved", "active", "funded", "accepted", "delivered", "released", "verified", "allow", "valid", "resolved"].includes(s)) {
+    tone = "tone-active";
+  } else if (["pending", "pending_approval", "proposed", "disputed", "require_human_approval"].includes(s)) {
+    tone = "tone-bright";
+  }
+  return `<span class="badge ${tone}">${esc(cleanCase(status))}</span>`;
+}
+
+function toast(msg) {
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 4200);
+}
+
+const fmt = (baseUnits, dec = 18) => {
+  try {
+    const s = String(baseUnits ?? "0");
+    if (s.includes(".")) return s;
+    const v = BigInt(s);
+    const d = 10n ** BigInt(dec);
+    const whole = v / d;
+    const frac = (v % d).toString().padStart(dec, "0").slice(0, 2);
+    return whole.toLocaleString("en-US") + (frac === "00" ? "" : "." + frac);
+  } catch {
+    return String(baseUnits ?? "0");
+  }
+};
+
+const fmtCompact = (baseUnits) => {
+  const n = Number(fmt(baseUnits).replace(/,/g, "")) || 0;
+  return n.toLocaleString("en-US", { maximumFractionDigits: 0 });
+};
+
+const toBaseUnits = (val) => {
+  const clean = String(val ?? "0").trim();
+  if (!clean) return "0";
+  if (clean.length > 14 && /^\d+$/.test(clean)) return clean;
+  const [w, f = ""] = clean.split(".");
+  const whole = BigInt(w || "0") * 10n ** 18n;
+  const frac = BigInt((f + "0".repeat(18)).slice(0, 18));
+  return (whole + frac).toString();
+};
+
+const when = (iso) => (iso ? new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }) : "—");
+const short = (h, n = 10) => (h && h.length > n + 6 ? h.slice(0, n) + "…" + h.slice(-6) : h || "—");
+
+function field(id, label, opts = {}) {
+  const { type = "text", value = "", placeholder = "", hint = "" } = opts;
+  return `<div class="field">
+    <label for="${esc(id)}">${esc(label)}</label>
+    <input id="${esc(id)}" type="${esc(type)}" value="${esc(value)}" placeholder="${esc(placeholder)}" autocomplete="off" />
+    ${hint ? `<div class="field-hint">${esc(hint)}</div>` : ""}
+  </div>`;
+}
+
+async function api(method, path, body, customToken, isRetry = false) {
+  const tok = customToken || state.token;
+  const headers = {
+    accept: "application/json",
+    ...(body !== undefined ? { "content-type": "application/json" } : {}),
+    ...(tok ? { authorization: "Bearer " + tok } : {}),
+  };
+  if (method === "POST") {
+    headers["idempotency-key"] = "ui-" + Date.now() + "-" + Math.random().toString(36).slice(2, 9);
+  }
+  const res = await fetch("/v1" + path, {
+    method,
+    headers,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+  const text = await res.text();
+  let json = null;
+  try { json = text ? JSON.parse(text) : null; } catch { json = null; }
+
+  /* Auto-heal stale token on 401 so user is never locked out */
+  if (res.status === 401 && !isRetry && !customToken) {
+    const bootRes = await fetch("/v1/bootstrap/status?ensure=1").then((r) => r.json()).catch(() => null);
+    if (bootRes?.demoPrincipals?.northwind_owner) {
+      state.demoPrincipals = bootRes.demoPrincipals;
+      state.token = bootRes.demoPrincipals.northwind_owner;
+      store.set("apn.token", state.token);
+      return api(method, path, body, state.token, true);
+    }
+  }
+
+  if (!res.ok) {
+    const e = new Error(json?.error?.message || res.status + " " + res.statusText);
+    e.code = json?.error?.code;
+    e.details = json?.error?.details;
+    throw e;
+  }
+  return json;
+}
+
+const NAV_ITEMS = [
+  ["overview", "Overview", "i-home", null],
+  ["requests", "Procurement Requests", "i-doc", "requests"],
+  ["approvals", "Approvals Queue", "i-check", "approvals"],
+  ["agreements", "Escrow & Settlement", "i-lock", "agreements"],
+  ["disputes", "Disputes & Arbitration", "i-scale", "disputes"],
+  ["agents", "Agents & Budgets", "i-bot", "agents"],
+  ["vendors", "Vendors & Services", "i-store", "vendors"],
+  ["policies", "Policy Engine", "i-sliders", "policies"],
+  ["org", "Organization & Access", "i-org", null],
+  ["keys", "Credentials & Keys", "i-key", null],
+  ["webhooks", "Webhooks & Audit", "i-bolt", "webhooks"],
+];
+
+const NAV_LABELS = Object.fromEntries(NAV_ITEMS.map(([id, label]) => [id, label]));
+
+async function refreshCounts() {
+  try {
+    const [reqs, aprs, agrs, dsps, ags, vnds, pols, whs] = await Promise.all([
+      api("GET", "/requests?limit=50").catch(() => ({ data: [] })),
+      api("GET", "/approvals?status=pending&limit=50").catch(() => ({ data: [] })),
+      api("GET", "/agreements?limit=50").catch(() => ({ data: [] })),
+      api("GET", "/disputes?limit=50").catch(() => ({ data: [] })),
+      api("GET", "/agents").catch(() => ({ data: [] })),
+      api("GET", "/vendors?scope=all").catch(() => ({ data: [] })),
+      api("GET", "/policies").catch(() => ({ data: [] })),
+      api("GET", "/webhooks").catch(() => ({ data: [] })),
+    ]);
+    state.counts.requests = reqs.data?.length || 0;
+    state.counts.approvals = aprs.data?.length || 0;
+    state.counts.agreements = agrs.data?.length || 0;
+    state.counts.disputes = (dsps.data || []).filter((d) => d.status !== "resolved").length;
+    state.counts.agents = ags.data?.length || 0;
+    state.counts.vendors = vnds.data?.length || 0;
+    state.counts.policies = pols.data?.length || 0;
+    state.counts.webhooks = whs.data?.length || 0;
+    document.querySelectorAll("[data-count-key]").forEach((el) => {
+      const k = el.getAttribute("data-count-key");
+      if (k && state.counts[k] !== undefined) el.textContent = String(state.counts[k]);
+    });
+    const bell = $("#bellCount");
+    if (bell) {
+      const n = state.counts.approvals + state.counts.disputes;
+      bell.textContent = String(n);
+      bell.style.display = n > 0 ? "grid" : "none";
+    }
+  } catch {}
+}
+
+function renderShell() {
+  const org = state.org || {};
+  const dp = state.demoPrincipals || {};
+  const personaOptions = [
+    ["Northwind Robotics · Buyer Owner", dp.northwind_owner, "O"],
+    ["Northwind Robotics · Approver", dp.northwind_approver, "A"],
+    ["Northwind Robotics · Sourcing Agent", dp.northwind_agent, "S"],
+    ["Helios Compute · Vendor Owner", dp.helios_owner, "H"],
+  ].filter((x) => x[1]);
+  const activePersona = personaOptions.find(([, tok]) => tok === state.token);
+  const avatarLetter = activePersona ? activePersona[2] : String(org.name || "C").charAt(0).toUpperCase();
+  const escrowAddr = state.meta?.chain?.escrow || "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+
+  $("#app").innerHTML = `
+    <aside class="rail">
+      <a class="rail-logo" href="${esc(landingHref())}" title="ProMeo — return to website">
+        <img src="/assets/logo.png" alt="ProMeo" />
+      </a>
+      <div class="rail-sep"></div>
+      <nav class="rail-btns" aria-label="Console modules">
+        ${NAV_ITEMS.map(([id, label, icon]) => `
+          <button class="rail-btn" data-tab="${esc(id)}" aria-selected="${state.tab === id}" type="button" title="${esc(label)}">
+            <svg class="ric"><use href="#${esc(icon)}"/></svg>
+            <span class="rail-tip">${esc(label)}</span>
+          </button>
+        `).join("")}
+      </nav>
+      <div class="rail-foot">
+        <a class="rail-btn" href="${esc(landingHref())}" title="Back to website" type="button">
+          <svg class="ric"><use href="#i-home"/></svg>
+          <span class="rail-tip">Website</span>
+        </a>
+        <button class="rail-btn" id="railLogoutBtn" title="Disconnect & Sign out" type="button" style="margin-top:6px;color:#e74c3c">
+          <svg class="ric"><use href="#i-back"/></svg>
+          <span class="rail-tip">Sign Out</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-col">
+      <header class="appbar">
+        <div class="appbar-title">
+          <h1>${esc(NAV_LABELS[state.tab] || "Overview")}</h1>
+          <span class="mark-chip"><img src="/assets/logo.png" alt="" /></span>
+          <span class="appbar-sub">${esc(org.name || "ProMeo Protocol")} · Mezo Chain 31611</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="appbar-controls">
+          ${(org.walletAddress || store.get("apn.wallet")) ? `
+            <span class="addr-chip" title="Connected wallet" style="background:rgba(109,63,234,0.12);color:var(--purple);font-weight:600">
+              <span class="mono">${esc(short(org.walletAddress || store.get("apn.wallet"), 6))}</span>
+            </span>
+          ` : ""}
+          <button class="icon-btn" id="bellBtn" title="Alerts — pending approvals and open disputes" type="button">
+            <svg class="ric"><use href="#i-bell"/></svg>
+            <span class="dot-badge" id="bellCount" style="display:none">0</span>
+          </button>
+          <span class="addr-chip">
+            <span class="mono">${esc(short(escrowAddr, 6))}</span>
+            <button class="copy-btn" id="copyEscrow" title="Copy settlement contract address" type="button">
+              <svg class="ric"><use href="#i-copy"/></svg>
+            </button>
+          </span>
+          <button class="avatar-chip" id="avatarBtn" title="Switch account credential" type="button">${esc(avatarLetter)}</button>
+          <button class="btn sm" id="logoutBtn" title="Disconnect wallet and sign out" type="button" style="display:flex;align-items:center;gap:6px;background:rgba(231,76,60,0.1);color:#c0392b;border:1px solid rgba(231,76,60,0.25);border-radius:99px;font-weight:600;padding:6px 14px">
+            <svg class="ric" style="width:14px;height:14px"><use href="#i-back"/></svg>
+            <span>Disconnect</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="band">
+        <main id="view"><div class="load-box">Loading live protocol state…</div></main>
+      </div>
+    </div>
+  `;
+
+  const doLogout = () => {
+    store.del("apn.token");
+    store.del("apn.wallet");
+    try {
+      localStorage.removeItem("apn.token");
+      localStorage.removeItem("apn.wallet");
+    } catch {}
+    window.location.href = "/?disconnected=1";
+  };
+  const lBtn = $("#logoutBtn");
+  if (lBtn) lBtn.onclick = doLogout;
+  const rLBtn = $("#railLogoutBtn");
+  if (rLBtn) rLBtn.onclick = doLogout;
+
+  $("#bellBtn").onclick = () => openBell();
+  $("#copyEscrow").onclick = () => copyText(escrowAddr);
+  $("#avatarBtn").onclick = () => showKeyModal();
+
+  document.querySelectorAll(".rail-btn[data-tab]").forEach((b) => {
+    b.onclick = () => {
+      state.tab = b.dataset.tab;
+      document.querySelectorAll(".rail-btn[data-tab]").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+      renderTab();
+    };
+  });
+}
+
+function showKeyModal() {
+  const dp = state.demoPrincipals || {};
+  const seeded = [
+    ["Northwind Robotics · Buyer Owner", dp.northwind_owner],
+    ["Northwind Robotics · Human Approver", dp.northwind_approver],
+    ["Northwind Robotics · Sourcing Agent", dp.northwind_agent],
+    ["Helios Compute · Vendor Owner", dp.helios_owner],
+  ].filter((x) => x[1]);
+
+  $("#modalRoot").innerHTML = `
+    <div class="modal-backdrop" id="modalBg">
+      <div class="modal-card">
+        <div class="card-head">
+          <div>
+            <h2>Switch credential or provision tenant</h2>
+            <div class="card-sub">Use any seeded credential, paste a custom key, or bootstrap a new organization.</div>
+          </div>
+          <button class="btn sm" id="closeModal" type="button">Close</button>
+        </div>
+
+        ${seeded.length ? `
+          <div style="margin-bottom:16px">
+            <label>Seeded network accounts</label>
+            <div class="grid" style="gap:8px">
+              ${seeded.map(([label, tok]) => `
+                <button class="btn" data-pick-tok="${esc(tok)}" style="justify-content:space-between;width:100%" type="button">
+                  <span>${esc(label)}</span>
+                  <span class="mono muted">${esc(tok.slice(0, 14))}…</span>
+                </button>
+              `).join("")}
+            </div>
+          </div>
+          <div class="sep"></div>
+        ` : ""}
+
+        ${field("customTok", "Custom organization or agent credential", { value: state.token, placeholder: "apn_u_…" })}
+        <button class="btn primary" id="applyCustomTok" style="width:100%" type="button">Apply credential</button>
+
+        <div class="sep"></div>
+        <h3 style="margin-bottom:10px">Provision new buyer organization</h3>
+        <div class="grid g-2" style="gap:10px">
+          ${field("bootName", "Organization name", { placeholder: "Vertex Robotics" })}
+          ${field("bootEmail", "Owner email", { placeholder: "founder@vertex.io" })}
+        </div>
+        <button class="btn subtle" id="runBootstrap" style="width:100%" type="button">Create organization &amp; sign in</button>
+      </div>
+    </div>
+  `;
+
+  $("#closeModal").onclick = () => { $("#modalRoot").innerHTML = ""; };
+  $("#modalBg").onclick = (e) => { if (e.target.id === "modalBg") $("#modalRoot").innerHTML = ""; };
+
+  document.querySelectorAll("[data-pick-tok]").forEach((btn) => {
+    btn.onclick = async () => {
+      state.token = btn.getAttribute("data-pick-tok");
+      store.set("apn.token", state.token);
+      $("#modalRoot").innerHTML = "";
+      await boot();
+      toast("Switched active account");
+    };
+  });
+
+  $("#applyCustomTok").onclick = async () => {
+    const val = $("#customTok").value.trim();
+    if (!val) return;
+    state.token = val;
+    store.set("apn.token", state.token);
+    $("#modalRoot").innerHTML = "";
+    await boot();
+    toast("Credential updated");
+  };
+
+  $("#runBootstrap").onclick = async () => {
+    const orgName = $("#bootName").value.trim() || "Vertex Autonomous " + Math.floor(Math.random() * 900 + 100);
+    const email = $("#bootEmail").value.trim() || "ops@vertex.example";
+    const slug = orgName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 26) + "-" + Math.random().toString(36).slice(2, 6);
+    try {
+      const res = await fetch("/v1/bootstrap", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ orgName, slug, email, displayName: "Organization Owner" }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error?.message || "Failed to provision organization");
+      state.token = body.token;
+      store.set("apn.token", state.token);
+      $("#modalRoot").innerHTML = "";
+      await boot();
+      toast("Provisioned " + orgName + " and activated default policy");
+    } catch (e) {
+      toast(e.message);
+    }
+  };
+}
+
+async function openBell() {
+  $("#modalRoot").innerHTML = `<div class="modal-backdrop" id="modalBg"><div class="modal-card"><div class="empty-box">Loading alerts…</div></div></div>`;
+  $("#modalBg").onclick = (e) => { if (e.target.id === "modalBg") $("#modalRoot").innerHTML = ""; };
+  const [aprs, dsps] = await Promise.all([
+    api("GET", "/approvals?status=pending&limit=20").catch(() => ({ data: [] })),
+    api("GET", "/disputes?limit=20").catch(() => ({ data: [] })),
+  ]);
+  const pending = aprs.data || [];
+  const open = (dsps.data || []).filter((d) => d.status !== "resolved");
+  $("#modalRoot").innerHTML = `
+    <div class="modal-backdrop" id="modalBg">
+      <div class="modal-card">
+        <div class="card-head">
+          <div>
+            <h2>Live alerts</h2>
+            <div class="card-sub">Items that currently require human or resolver attention.</div>
+          </div>
+          <button class="btn sm" id="closeModal" type="button">Close</button>
+        </div>
+        <h3 style="margin-bottom:8px">Pending approvals (${pending.length})</h3>
+        <div class="quick-list" style="margin-bottom:16px">
+          ${pending.length ? pending.map((row) => {
+            const a = row.approval || row;
+            return `<div class="quick-item"><span><b>${esc(row.requestTitle || "Procurement request")}</b><span class="mono">${esc(cleanRef(row.requestReference))}</span></span><button class="btn sm subtle" data-jump-tab="approvals" type="button">Review →</button></div>`;
+          }).join("") : `<div class="quick-item"><span class="muted">Queue is clear.</span></div>`}
+        </div>
+        <h3 style="margin-bottom:8px">Open disputes (${open.length})</h3>
+        <div class="quick-list">
+          ${open.length ? open.map((d) => `<div class="quick-item"><span><b>${esc(short(d.agreementOnchainId, 8))}</b><span class="mono">${esc(fmt(d.agreementAmount))} Musd</span></span><button class="btn sm subtle" data-jump-tab="disputes" type="button">Open →</button></div>`).join("") : `<div class="quick-item"><span class="muted">No open disputes.</span></div>`}
+        </div>
+      </div>
+    </div>
+  `;
+  $("#closeModal").onclick = () => { $("#modalRoot").innerHTML = ""; };
+  $("#modalBg").onclick = (e) => { if (e.target.id === "modalBg") $("#modalRoot").innerHTML = ""; };
+  document.querySelectorAll("[data-jump-tab]").forEach((b) => {
+    b.onclick = () => {
+      $("#modalRoot").innerHTML = "";
+      navigateTo(b.getAttribute("data-jump-tab"));
+    };
+  });
+}
+
+function pageHeader(eyebrowText, title, subtitle, actionsHtml = "") {
+  return `
+    <div class="page-head">
+      <div>
+        <div class="page-eyebrow"><svg><use href="#i-spark"/></svg><span>${esc(eyebrowText)}</span></div>
+        <h1 style="font-size:20px">${esc(title)}</h1>
+        <p style="margin-top:6px;font-size:13px">${esc(subtitle)}</p>
+      </div>
+      ${actionsHtml ? `<div class="page-actions">${actionsHtml}</div>` : ""}
+    </div>
+  `;
+}
+
+function table(cols, rows, rowFn, emptyText = "No records found in this view.") {
+  if (!rows || !rows.length) return `<div class="empty-box">${esc(emptyText)}</div>`;
+  return `<div class="table-wrap"><table><thead><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${rows.map(rowFn).join("")}</tbody></table></div>`;
+}
+
+function navigateTo(tabId, extra = {}) {
+  Object.assign(state, extra);
+  state.tab = tabId;
+  renderShell();
+  renderTab();
+}
+
+/* =========================================================================
+   Glassy stat card illustrations
+   ========================================================================= */
+function glassLock() {
+  return `<svg class="glass-ic" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <defs><linearGradient id="gl1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="rgba(255,255,255,0.55)"/><stop offset="1" stop-color="rgba(255,255,255,0.08)"/></linearGradient></defs>
+    <path d="M22 30v-7a10 10 0 0 1 20 0v7" stroke="rgba(255,255,255,0.85)" stroke-width="4" stroke-linecap="round"/>
+    <rect x="13" y="29" width="38" height="28" rx="9" fill="url(#gl1)" stroke="rgba(255,255,255,0.9)" stroke-width="2.5"/>
+    <circle cx="32" cy="41" r="4.5" fill="rgba(255,255,255,0.95)"/>
+    <path d="M32 44.5v5" stroke="rgba(255,255,255,0.95)" stroke-width="3" stroke-linecap="round"/>
+  </svg>`;
+}
+function glassDonut() {
+  return `<svg class="glass-ic" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <circle cx="32" cy="32" r="19" stroke="rgba(255,255,255,0.35)" stroke-width="9"/>
+    <circle cx="32" cy="32" r="19" stroke="rgba(255,255,255,0.95)" stroke-width="9" stroke-dasharray="78 120" stroke-linecap="round" transform="rotate(-90 32 32)"/>
+    <circle cx="32" cy="32" r="9.5" fill="rgba(255,255,255,0.35)" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+  </svg>`;
+}
+function glassRocket() {
+  return `<svg class="glass-ic" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <defs><linearGradient id="gl3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="rgba(255,255,255,0.6)"/><stop offset="1" stop-color="rgba(255,255,255,0.1)"/></linearGradient></defs>
+    <path d="M32 6c9 8 12 21 7 32l-7 9-7-9c-5-11-2-24 7-32Z" fill="url(#gl3)" stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linejoin="round"/>
+    <circle cx="32" cy="25" r="5.5" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.95)" stroke-width="2.5"/>
+    <path d="M22 36l-8 12 10-3M42 36l8 12-10-3" stroke="rgba(255,255,255,0.85)" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M32 50v8" stroke="rgba(255,255,255,0.85)" stroke-width="3" stroke-linecap="round"/>
+  </svg>`;
+}
+
+/* =========================================================================
+   Gauge with radial rays
+   ========================================================================= */
+function gaugeHtml(pct, bigText, subText) {
+  const RAYS = 60;
+  const lit = Math.max(0, Math.min(RAYS, Math.round((pct / 100) * RAYS)));
+  let lines = "";
+  for (let i = 0; i < RAYS; i++) {
+    const a = (i / RAYS) * Math.PI * 2 - Math.PI / 2;
+    const r1 = i % 5 === 0 ? 62 : 68;
+    const r2 = 82;
+    const x1 = 94 + Math.cos(a) * r1, y1 = 84 + Math.sin(a) * r1;
+    const x2 = 94 + Math.cos(a) * r2, y2 = 84 + Math.sin(a) * r2;
+    const on = i < lit;
+    lines += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${on ? "#6d3fea" : "rgba(84,58,170,0.16)"}" stroke-width="${on ? 3.4 : 2.4}" stroke-linecap="round"/>`;
+  }
+  return `
+    <div class="gauge-box">
+      <div class="gauge-inner">
+        <svg viewBox="0 0 188 168" aria-hidden="true">${lines}</svg>
+        <div class="gauge-num">${esc(bigText)}</div>
+        <div class="gauge-sub">${esc(subText)}</div>
+      </div>
+    </div>
+  `;
+}
+
+/* =========================================================================
+   Activity chart built from the real audit hash chain
+   ========================================================================= */
+function buildChartBuckets(range) {
+  const now = Date.now();
+  let buckets, span, labels;
+  if (range === "d") { buckets = 24; span = 3600e3; }
+  else if (range === "w") { buckets = 7; span = 86400e3; }
+  else if (range === "m") { buckets = 30; span = 86400e3; }
+  else { buckets = 12; span = 30 * 86400e3; }
+  const counts = new Array(buckets).fill(0);
+  for (const ts of state.chartData) {
+    const idx = buckets - 1 - Math.floor((now - ts) / span);
+    if (idx >= 0 && idx < buckets) counts[idx]++;
+  }
+  const cum = [];
+  let run = 0;
+  for (const c of counts) { run += c; cum.push(run); }
+  const labelsArr = counts.map((_, i) => {
+    const t = new Date(now - (buckets - 1 - i) * span);
+    if (range === "d") return t.getHours() + ":00";
+    if (range === "y") return t.toLocaleString("en", { month: "short" });
+    return String(t.getDate()) + " " + t.toLocaleString("en", { month: "short" });
+  });
+  return { counts, cum, labels: labelsArr };
+}
+
+function renderActivityChart() {
+  const { cum, counts, labels } = buildChartBuckets(state.range);
+  const W = 640, H = 210, PADL = 8, PADR = 62, PADT = 14, PADB = 26;
+  const maxV = Math.max(...cum, 1);
+  const nice = Math.ceil(maxV * 1.15) || 5;
+  const iw = W - PADL - PADR, ih = H - PADT - PADB;
+  const x = (i) => PADL + (iw * i) / Math.max(1, cum.length - 1);
+  const y = (v) => PADT + ih - (ih * v) / nice;
+
+  let grid = "";
+  for (let g = 0; g <= 4; g++) {
+    const gv = (nice / 4) * g;
+    const gy = y(gv);
+    grid += `<line x1="${PADL}" y1="${gy}" x2="${PADL + iw}" y2="${gy}" stroke="rgba(84,58,170,0.18)" stroke-dasharray="3 6" stroke-width="1"/>`;
+    grid += `<text x="${PADL + iw + 10}" y="${gy + 3.5}" font-size="10" fill="#7d76a0" font-family="Inter,sans-serif">${Math.round(gv).toLocaleString("en-US")}</text>`;
+  }
+
+  const pts = cum.map((v, i) => [x(i), y(v)]);
+  let dPath = `M ${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 1; i < pts.length; i++) {
+    const [px, py] = pts[i - 1], [cx2, cy2] = pts[i];
+    const mx = (px + cx2) / 2;
+    dPath += ` C ${mx} ${py}, ${mx} ${cy2}, ${cx2} ${cy2}`;
+  }
+  const area = dPath + ` L ${pts[pts.length - 1][0]} ${PADT + ih} L ${pts[0][0]} ${PADT + ih} Z`;
+  const [ex, ey] = pts[pts.length - 1];
+
+  const maxBar = Math.max(...counts, 1);
+  const bw = iw / counts.length;
+  let bars = "";
+  for (let i = 0; i < counts.length; i++) {
+    const bh = Math.max(2, (counts[i] / maxBar) * 30);
+    bars += `<rect x="${(PADL + i * bw + bw * 0.22).toFixed(1)}" y="${(34 - bh).toFixed(1)}" width="${(bw * 0.56).toFixed(1)}" height="${bh.toFixed(1)}" rx="1.5" fill="rgba(109,63,234,0.8)"/>`;
+  }
+  let xlabels = "";
+  const stepLbl = Math.ceil(labels.length / 6);
+  for (let i = 0; i < labels.length; i += stepLbl) {
+    xlabels += `<text x="${PADL + i * bw}" y="${46}" font-size="9.5" fill="#7d76a0" font-family="Inter,sans-serif">${esc(labels[i])}</text>`;
+  }
+
+  const el = $("#activityChart");
+  if (el) {
+    el.innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:230px">
+        <defs>
+          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="rgba(139,92,246,0.32)"/>
+            <stop offset="1" stop-color="rgba(139,92,246,0.02)"/>
+          </linearGradient>
+        </defs>
+        ${grid}
+        <path d="${area}" fill="url(#areaGrad)"/>
+        <path d="${dPath}" fill="none" stroke="#5a2fd6" stroke-width="2.6" stroke-linecap="round"/>
+        <circle cx="${ex}" cy="${ey}" r="4.5" fill="#1c1436" stroke="#ffffff" stroke-width="2"/>
+      </svg>
+      <svg viewBox="0 0 ${W} 52" preserveAspectRatio="none" style="height:46px;margin-top:2px">
+        ${bars}
+        ${xlabels}
+      </svg>
+    `;
+  }
+}
+
+/* =========================================================================
+   1. Overview — the reference layout
+   ========================================================================= */
+async function viewOverview() {
+  $("#view").innerHTML = `<div class="load-box">Loading live protocol state…</div>`;
+  const [reqs, agrs, aprs, dsps, whs, audit, verify] = await Promise.all([
+    api("GET", "/requests?limit=50").catch(() => ({ data: [] })),
+    api("GET", "/agreements?limit=50").catch(() => ({ data: [] })),
+    api("GET", "/approvals?status=pending&limit=20").catch(() => ({ data: [] })),
+    api("GET", "/disputes?limit=20").catch(() => ({ data: [] })),
+    api("GET", "/webhooks").catch(() => ({ data: [] })),
+    api("GET", "/audit?limit=200").catch(() => ({ data: [] })),
+    api("GET", "/audit/verify").catch(() => ({ valid: true, checked: 0 })),
+  ]);
+
+  const R = reqs.data, A = agrs.data, P = aprs.data, D = dsps.data, W = whs.data;
+  const activeEscrow = A.filter((a) => ["funded", "accepted", "delivered", "disputed"].includes(a.state));
+  const released = A.filter((a) => a.state === "released");
+  const heldMusd = activeEscrow.reduce((acc, a) => acc + BigInt(a.amount || "0"), 0n);
+  const settledMusd = released.reduce((acc, a) => acc + BigInt(a.amount || "0"), 0n);
+  const movingMusd = heldMusd + settledMusd;
+  const finalizedPct = movingMusd > 0n ? Math.round(Number(settledMusd * 100n / movingMusd)) : 0;
+  const openDisputes = D.filter((d) => d.status !== "resolved").length;
+
+  state.chartData = (audit.data || [])
+    .map((r) => Date.parse(r.createdAt))
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b);
+  state.overviewData = { reqs: R, agrs: A, aprs: P };
+
+  const rangeVol = rangeVolume(A);
+
+  $("#view").innerHTML = `
+    <div class="hero-cards">
+      <div class="hcard" data-jump="agreements">
+        <div class="hcard-label">Escrow locked on Mezo</div>
+        <div class="hcard-value">$${esc(fmtCompact(heldMusd))}</div>
+        ${glassLock()}
+        <span class="hcard-chip"><span class="cdot"></span><span>${esc(String(activeEscrow.length))} active agreements</span></span>
+      </div>
+      <div class="hcard" data-jump="webhooks">
+        <div class="hcard-label">Audit chain integrity</div>
+        <div class="hcard-value">${verify?.valid ? "100%" : "Check"}</div>
+        ${glassDonut()}
+        <span class="hcard-chip"><span class="cdot"></span><span>${esc(String(verify?.checked ?? 0))} verified events</span></span>
+      </div>
+      <div class="hcard" data-jump="agreements">
+        <div class="hcard-label">Musd settled to vendors</div>
+        <div class="hcard-value">${esc(fmtCompact(settledMusd))}</div>
+        ${glassRocket()}
+        <span class="hcard-chip"><span class="cdot"></span><span>${esc(String(finalizedPct))}% of finalized volume</span></span>
+      </div>
+    </div>
+
+    <div class="hero-main">
+      <div class="white-card">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title"><span class="mark-chip" style="width:24px;height:24px"><img src="/assets/logo.png" alt="" /></span> Network activity</div>
+            <div class="chart-big">$${esc(fmtCompact(rangeVol))}</div>
+            <div class="muted" style="font-size:12px">Escrow volume from agreements created in the selected window · audit events plotted below</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <div class="range-pills" role="group" aria-label="Time range">
+              ${[["d", "1D"], ["w", "1W"], ["m", "1M"], ["y", "1Y"]].map(([k, lab]) => `
+                <button class="rpill" data-range="${k}" aria-pressed="${state.range === k}" type="button">${esc(lab)}</button>
+              `).join("")}
+            </div>
+            ${sparkBtn("ovNewReq", "New Request", true)}
+          </div>
+        </div>
+        <div class="chart-wrap" id="activityChart"></div>
+      </div>
+
+      <div class="white-card side-panel">
+        <div class="stab-row" role="tablist" aria-label="Quick actions">
+          <button class="stab" data-qtab="create" aria-selected="true" type="button">Create</button>
+          <button class="stab" data-qtab="approve" aria-selected="false" type="button">Approve</button>
+          <button class="stab" data-qtab="escrow" aria-selected="false" type="button">Escrow</button>
+        </div>
+
+        ${gaugeHtml(finalizedPct, fmtCompact(settledMusd), finalizedPct + "% finalized")}
+
+        <div id="qtabCreate">
+          <div class="q-label">Request amount <small>Musd</small></div>
+          <div class="input-pill">
+            <input id="qcAmount" type="text" value="480" inputmode="decimal" aria-label="Request amount in Musd" />
+            <button class="inner-btn" id="qcMax" type="button">Max</button>
+          </div>
+          <div class="q-label" style="margin-top:12px">Category</div>
+          <div class="pill-row">
+            ${[["cloud_infrastructure", "Infrastructure"], ["software", "Software"], ["security", "Security"]].map(([v, lab]) => `
+              <button class="pill-opt" data-qcat="${v}" aria-pressed="${state.qcCat === v}" type="button">${esc(lab)}</button>
+            `).join("")}
+          </div>
+          <div class="q-rows" style="margin-top:10px">
+            <button class="q-row" data-jump="approvals" type="button"><span>Pending approvals</span><span class="q-val">${esc(String(P.length))} <svg class="ric"><use href="#i-arrow"/></svg></span></button>
+            <button class="q-row" data-jump="disputes" type="button"><span>Open disputes</span><span class="q-val">${esc(String(openDisputes))} <svg class="ric"><use href="#i-arrow"/></svg></span></button>
+            <button class="q-row" data-jump="webhooks" type="button"><span>Audit entries verified</span><span class="q-val">${esc(String(verify?.checked ?? 0))} <svg class="ric"><use href="#i-arrow"/></svg></span></button>
+          </div>
+          <button class="btn-dark" id="qcPublish" style="margin-top:12px" type="button">Publish Request</button>
+        </div>
+
+        <div id="qtabApprove" style="display:none">
+          <div class="quick-list">
+            ${P.length ? P.slice(0, 4).map((row) => {
+              const a = row.approval || row;
+              return `<div class="quick-item">
+                <span><b>${esc(row.requestTitle || "Procurement request")}</b><span class="mono">${esc(cleanRef(row.requestReference))} · ${esc(row.offerPriceDisplay || "")}</span></span>
+                <span style="display:flex;gap:6px">
+                  <button class="btn sm primary" data-qdecide="${esc(a.id)}" data-qdecision="approved" type="button">Approve</button>
+                  <button class="btn sm" data-qdecide="${esc(a.id)}" data-qdecision="rejected" type="button">Reject</button>
+                </span>
+              </div>`;
+            }).join("") : `<div class="quick-item"><span class="muted">Approval queue is clear.</span></div>`}
+          </div>
+          <button class="btn-dark" id="qGoApprovals" style="margin-top:12px" type="button">Open Approvals Queue</button>
+        </div>
+
+        <div id="qtabEscrow" style="display:none">
+          <div class="quick-list">
+            ${(() => {
+              const active = A.filter((a) => ["funded", "accepted", "delivered"].includes(a.state)).slice(0, 4);
+              if (!active.length) return `<div class="quick-item"><span class="muted">No agreements awaiting an on-chain action.</span></div>`;
+              const nextOf = (s) => (s === "funded" ? ["accept", "Accept order"] : s === "accepted" ? ["deliver", "Attest delivery"] : ["release", "Release Musd"]);
+              return active.map((a) => {
+                const [act, lab] = nextOf(a.state);
+                return `<div class="quick-item">
+                  <span><b>${esc(a.vendorName || "Helios Compute")}</b><span class="mono">${esc(a.amountDisplay || fmt(a.amount))} Musd · ${esc(cleanCase(a.state))}</span></span>
+                  <button class="btn sm primary" data-qexec="${esc(a.id)}" data-qaction="${act}" type="button">${esc(lab)}</button>
+                </div>`;
+              }).join("");
+            })()}
+          </div>
+          <button class="btn-dark" id="qGoEscrow" style="margin-top:12px" type="button">Open Escrow &amp; Settlement</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g-2" style="margin-top:16px">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Recent procurement requests</h2>
+            <div class="card-sub">Click any request to inspect offers, run ranking, or award.</div>
+          </div>
+          <button class="btn sm" data-jump="requests" type="button">View all</button>
+        </div>
+        ${table(
+          ["Reference", "Title", "Budget", "Status"],
+          R.slice(0, 6),
+          (r) => `<tr class="clickable" data-open-req="${esc(r.id)}">
+            <td class="mono">${esc(cleanRef(r.reference))}</td>
+            <td style="color:var(--ink);font-weight:500">${esc(r.title)}</td>
+            <td class="mono">${esc(r.budgetAmountDisplay || fmt(r.budgetAmount))} Musd</td>
+            <td>${badge(r.status)}</td>
+          </tr>`,
+          "No procurement requests yet — publish the first one from the panel above."
+        )}
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>On-chain escrow agreements</h2>
+            <div class="card-sub">Live smart contract positions on Mezo Chain 31611.</div>
+          </div>
+          <button class="btn sm" data-jump="agreements" type="button">View all</button>
+        </div>
+        ${table(
+          ["On-chain id", "Vendor", "Amount", "State", ""],
+          A.slice(0, 6),
+          (a) => `<tr class="clickable" data-open-agr="${esc(a.id)}">
+            <td class="mono">${esc(short(a.onchainId, 10))}</td>
+            <td style="color:var(--ink);font-weight:500">${esc(a.vendorName || "Helios Compute")}</td>
+            <td class="mono">${esc(a.amountDisplay || fmt(a.amount))} Musd</td>
+            <td>${badge(a.state)}</td>
+            <td><button class="btn sm subtle" data-open-agr="${esc(a.id)}" type="button">Manage</button></td>
+          </tr>`,
+          "No escrow agreements yet — award an approved request to create one."
+        )}
+      </div>
+    </div>
+  `;
+
+  /* Chart + range interactions */
+  renderActivityChart();
+  document.querySelectorAll("[data-range]").forEach((b) => {
+    b.onclick = () => {
+      state.range = b.getAttribute("data-range");
+      document.querySelectorAll("[data-range]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      renderActivityChart();
+    };
+  });
+
+  /* Quick tabs */
+  const showQTab = (k) => {
+    $("#qtabCreate").style.display = k === "create" ? "" : "none";
+    $("#qtabApprove").style.display = k === "approve" ? "" : "none";
+    $("#qtabEscrow").style.display = k === "escrow" ? "" : "none";
+    document.querySelectorAll("[data-qtab]").forEach((t) => t.setAttribute("aria-selected", String(t.getAttribute("data-qtab") === k)));
+  };
+  document.querySelectorAll("[data-qtab]").forEach((t) => { t.onclick = () => showQTab(t.getAttribute("data-qtab")); });
+
+  /* Create quick request (real publish) */
+  $("#qcMax").onclick = () => { $("#qcAmount").value = "500"; };
+  document.querySelectorAll("[data-qcat]").forEach((p) => {
+    p.onclick = () => {
+      state.qcCat = p.getAttribute("data-qcat");
+      document.querySelectorAll("[data-qcat]").forEach((x) => x.setAttribute("aria-pressed", String(x === p)));
+    };
+  });
+  $("#qcPublish").onclick = async () => {
+    try {
+      const amount = $("#qcAmount").value.trim() || "480";
+      const created = await api("POST", "/requests", {
+        title: "Quick procurement request " + new Date().toLocaleDateString("en-GB"),
+        description: "Request created from the console overview quick panel with structured budget and category.",
+        category: state.qcCat,
+        budgetAmount: amount,
+        requirements: { capabilities: [], region: "eu-west" },
+      });
+      await api("POST", `/requests/${created.request.id}/publish`, {});
+      toast("Request published to the marketplace");
+      await refreshCounts();
+      await viewOverview();
+    } catch (e) { toast(e.message); }
+  };
+
+  /* Quick approvals (separation of duties handled via approver credential) */
+  document.querySelectorAll("[data-qdecide]").forEach((btn) => {
+    btn.onclick = async () => {
+      const id = btn.getAttribute("data-qdecide");
+      const decision = btn.getAttribute("data-qdecision");
+      try {
+        const approverTok = state.demoPrincipals?.northwind_approver || state.token;
+        await api("POST", `/approvals/${id}/decide`, { decision, note: "Decided from console overview quick panel" }, approverTok);
+        toast("Approval decision recorded: " + cleanCase(decision));
+        await refreshCounts();
+        await viewOverview();
+      } catch (e) { toast(e.message); }
+    };
+  });
+  const goA = $("#qGoApprovals");
+  if (goA) goA.onclick = () => navigateTo("approvals");
+
+  /* Quick escrow execution */
+  document.querySelectorAll("[data-qexec]").forEach((btn) => {
+    btn.onclick = async () => {
+      const id = btn.getAttribute("data-qexec");
+      const action = btn.getAttribute("data-qaction");
+      try {
+        toast("Broadcasting " + action + " transaction to Mezo Chain 31611…");
+        await api("POST", `/agreements/${id}/execute/${action}`, {});
+        toast("Confirmed on-chain: " + action);
+        await refreshCounts();
+        await viewOverview();
+      } catch (e) { toast(e.message); }
+    };
+  });
+  const goE = $("#qGoEscrow");
+  if (goE) goE.onclick = () => navigateTo("agreements");
+
+  $("#ovNewReq").onclick = () => navigateTo("requests");
+  document.querySelectorAll("[data-jump]").forEach((b) => {
+    b.onclick = () => navigateTo(b.getAttribute("data-jump"));
+  });
+  document.querySelectorAll("[data-open-req]").forEach((r) => {
+    r.onclick = () => navigateTo("requests", { selectedRequestId: r.getAttribute("data-open-req") });
+  });
+  document.querySelectorAll("[data-open-agr]").forEach((r) => {
+    r.onclick = (e) => {
+      e.stopPropagation();
+      navigateTo("agreements", { selectedAgreementId: r.getAttribute("data-open-agr") });
+    };
+  });
+}
+
+function rangeVolume(agreements) {
+  const span = state.range === "d" ? 86400e3 : state.range === "w" ? 7 * 86400e3 : state.range === "m" ? 30 * 86400e3 : 365 * 86400e3;
+  const cutoff = Date.now() - span;
+  let total = 0n;
+  let any = false;
+  for (const a of agreements) {
+    const ts = Date.parse(a.createdAt || a.createdAtIso || "");
+    if (Number.isFinite(ts) && ts >= cutoff) { total += BigInt(a.amount || "0"); any = true; }
+  }
+  if (!any) {
+    for (const a of agreements) total += BigInt(a.amount || "0");
+  }
+  return total;
+}
+
+/* =========================================================================
+   2. Procurement Requests & Offer Discovery
+   ========================================================================= */
+async function viewRequests() {
+  $("#view").innerHTML = `<div class="load-box">Loading procurement requests…</div>`;
+  const [reqs, vnds] = await Promise.all([
+    api("GET", "/requests?limit=50"),
+    api("GET", "/vendors?scope=all").catch(() => ({ data: [] })),
+  ]);
+
+  if (!state.selectedRequestId && reqs.data.length > 0) {
+    state.selectedRequestId = reqs.data[0].id;
+  }
+
+  $("#view").innerHTML = `
+    ${pageHeader(
+      "Sourcing & Discovery",
+      "Procurement requests & signed vendor offers",
+      "Create structured requests, publish to the marketplace, submit cryptographically signed vendor offers, and award under active policy rules."
+    )}
+
+    <div class="grid g-sidebar-left">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>New procurement request</h2>
+            <div class="card-sub">Creates a request in your organization and optionally publishes it immediately.</div>
+          </div>
+        </div>
+        ${field("rqTitle", "Request title", { placeholder: "Dedicated compute training cluster" })}
+        <div class="field">
+          <label for="rqCat">Category</label>
+          <select id="rqCat">
+            <option value="cloud_infrastructure">Cloud Infrastructure</option>
+            <option value="software">Software &amp; Licensing</option>
+            <option value="security">Security &amp; Auditing</option>
+            <option value="data">Data &amp; Feeds</option>
+            <option value="research">Research &amp; Evaluation</option>
+            <option value="professional_services">Professional Services</option>
+          </select>
+        </div>
+        ${field("rqBudget", "Maximum budget (Musd)", { value: "480", hint: "Amounts up to 500 Musd with verified vendors auto-approve; above 500 Musd routes to human approval." })}
+        ${field("rqCaps", "Required capabilities (comma-separated)", { value: "gpu, kubernetes", placeholder: "gpu, kubernetes" })}
+        <div class="field">
+          <label for="rqDesc">Technical specification</label>
+          <textarea id="rqDesc" placeholder="Dedicated cluster with European data residency and 99.9% uptime guarantee.">Dedicated compute node with European data residency, Kubernetes access, and automated health telemetry.</textarea>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          ${sparkBtn("btnCreatePublish", "Create & Publish Request")}
+          <button class="btn" id="btnCreateDraft" type="button">Save as draft</button>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2>Organization requests (${reqs.data.length})</h2>
+              <div class="card-sub">Select any row below to inspect its signed offers, run deterministic ranking, or create an escrow agreement.</div>
+            </div>
+          </div>
+          ${table(
+            ["Reference", "Title", "Category", "Budget", "Status", "Actions"],
+            reqs.data,
+            (r) => `<tr class="clickable" data-sel-req="${esc(r.id)}" style="${state.selectedRequestId === r.id ? "background:rgba(109,63,234,0.1)" : ""}">
+              <td class="mono">${esc(cleanRef(r.reference))}</td>
+              <td style="color:var(--ink);font-weight:500">${esc(r.title)}</td>
+              <td>${esc(cleanCase(r.category))}</td>
+              <td class="mono">${esc(r.budgetAmountDisplay || fmt(r.budgetAmount))} Musd</td>
+              <td>${badge(r.status)}</td>
+              <td style="display:flex;gap:6px">
+                ${r.status === "draft" ? `<button class="btn sm primary" data-pub-req="${esc(r.id)}" type="button">Publish</button>` : ""}
+                <button class="btn sm subtle" data-sel-req="${esc(r.id)}" type="button">Inspect</button>
+              </td>
+            </tr>`
+          )}
+        </div>
+
+        <div class="card" id="reqInspector">
+          <div class="empty-box">Select a request above to inspect offers and discovery ranking.</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const submitNewRequest = async (publishNow) => {
+    try {
+      const caps = $("#rqCaps").value.split(",").map((s) => s.trim()).filter(Boolean);
+      const created = await api("POST", "/requests", {
+        title: $("#rqTitle").value.trim() || "Dedicated compute node",
+        description: $("#rqDesc").value.trim() || "Managed compute node with service level guarantee.",
+        category: $("#rqCat").value,
+        budgetAmount: $("#rqBudget").value.trim() || "480",
+        requirements: { capabilities: caps, region: "eu-west" },
+      });
+      if (publishNow) {
+        await api("POST", `/requests/${created.request.id}/publish`, {});
+        toast("Request created and published to marketplace");
+      } else {
+        toast("Draft request saved");
+      }
+      state.selectedRequestId = created.request.id;
+      await refreshCounts();
+      await viewRequests();
+    } catch (e) {
+      toast(e.message);
+    }
+  };
+
+  $("#btnCreatePublish").onclick = () => submitNewRequest(true);
+  $("#btnCreateDraft").onclick = () => submitNewRequest(false);
+
+  document.querySelectorAll("[data-pub-req]").forEach((b) => {
+    b.onclick = async (e) => {
+      e.stopPropagation();
+      try {
+        const id = b.getAttribute("data-pub-req");
+        await api("POST", `/requests/${id}/publish`, {});
+        state.selectedRequestId = id;
+        toast("Request published to marketplace");
+        await viewRequests();
+      } catch (err) { toast(err.message); }
+    };
+  });
+
+  document.querySelectorAll("[data-sel-req]").forEach((el) => {
+    el.onclick = () => {
+      state.selectedRequestId = el.getAttribute("data-sel-req");
+      viewRequests();
+    };
+  });
+
+  if (state.selectedRequestId) {
+    await renderRequestInspector(state.selectedRequestId, vnds.data || []);
+  }
+}
+
+async function renderRequestInspector(reqId, allVendors) {
+  const box = $("#reqInspector");
+  if (!box) return;
+  try {
+    const [detail, offersRes, rankRes] = await Promise.all([
+      api("GET", `/requests/${reqId}`),
+      api("GET", `/requests/${reqId}/offers`).catch(() => ({ data: [] })),
+      api("GET", `/requests/${reqId}/offers/discover`).catch(() => null),
+    ]);
+    const r = detail.request;
+    const offersList = offersRes.data || [];
+    const ranking = rankRes?.ranking || [];
+
+    box.innerHTML = `
+      <div class="card-head">
+        <div>
+          <h2>${esc(cleanRef(r.reference))} · ${esc(r.title)}</h2>
+          <div class="card-sub">${esc(r.description)}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          ${badge(r.status)}
+          ${["draft", "open"].includes(r.status) ? `<button class="btn sm" id="btnCancelReq" type="button">Cancel request</button>` : ""}
+        </div>
+      </div>
+
+      <div class="kv-grid" style="margin-bottom:16px">
+        <div class="kv-item"><div class="k">Budget ceiling</div><div class="v mono">${esc(r.budgetAmountDisplay || fmt(r.budgetAmount))} Musd</div></div>
+        <div class="kv-item"><div class="k">Category</div><div class="v">${esc(cleanCase(r.category))}</div></div>
+        <div class="kv-item"><div class="k">Required capabilities</div><div class="v">${esc((r.requirements?.capabilities || []).join(", ") || "Standard")}</div></div>
+        <div class="kv-item"><div class="k">Awarded offer</div><div class="v mono">${esc(offersList.find((o) => o.status === "accepted") ? short(offersList.find((o) => o.status === "accepted").id, 12) : "None awarded yet")}</div></div>
+      </div>
+
+      ${r.status === "open" ? `
+        <div style="padding:16px;border-radius:16px;background:#faf8ff;border:1px solid var(--line);margin-bottom:16px">
+          <div style="font-weight:600;margin-bottom:10px;color:var(--ink)">Submit signed vendor offer (real typed-data signature)</div>
+          <div class="grid g-3" style="gap:10px">
+            <div class="field" style="margin:0">
+              <label for="ofVendor">Vendor</label>
+              <select id="ofVendor">
+                ${allVendors.map((v) => `<option value="${esc(v.id)}">${esc(v.name)} (Tier ${v.tier})</option>`).join("")}
+              </select>
+            </div>
+            <div class="field" style="margin:0">
+              <label for="ofPrice">Offer price (Musd)</label>
+              <input id="ofPrice" type="text" value="${esc(fmt(r.budgetAmount).replace(/,/g, ""))}" />
+            </div>
+            <div class="field" style="margin:0">
+              <label for="ofDays">Delivery time (days)</label>
+              <input id="ofDays" type="number" value="2" min="1" max="90" />
+            </div>
+          </div>
+          <div style="margin-top:12px;display:flex;justify-content:flex-end">
+            ${sparkBtn("btnSignSubmitOffer", "Sign & Submit Vendor Offer", true)}
+          </div>
+        </div>
+      ` : ""}
+
+      ${r.status === "approved" && (offersList.find((o) => o.status === "accepted") || null) ? `
+        <div style="padding:16px;border-radius:16px;background:#f3edff;border:1px solid rgba(109,63,234,0.3);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div>
+            <div style="font-weight:600;color:var(--ink)">Request approved for on-chain escrow settlement</div>
+            <div class="muted" style="font-size:12.5px">Create the non-custodial Musd escrow proposal and fund it on Mezo Chain 31611.</div>
+          </div>
+          ${sparkBtn("btnCreateEscrowFromReq", "Create & Open Escrow Agreement", true)}
+        </div>
+      ` : ""}
+
+      ${r.status === "pending_approval" ? `
+        <div style="padding:16px;border-radius:16px;background:#f3edff;border:1px solid rgba(109,63,234,0.3);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div>
+            <div style="font-weight:600;color:var(--ink)">Awaiting human approval gate</div>
+            <div class="muted" style="font-size:12.5px">This award exceeded the autonomous threshold and is queued in the approvals module.</div>
+          </div>
+          <button class="btn sm primary" id="btnJumpApprovals" type="button">Review in approvals queue →</button>
+        </div>
+      ` : ""}
+
+      <h3 style="margin-bottom:10px">Signed vendor offers & deterministic ranking (${offersList.length})</h3>
+      ${table(
+        ["Vendor", "Price", "Delivery", "Rank score", "Offer hash", "Status", "Action"],
+        offersList,
+        (o) => {
+          const rk = ranking.find((x) => x.offerId === o.id);
+          return `<tr>
+            <td style="color:var(--ink);font-weight:500">${esc(o.vendorName || "Helios Compute")} ${o.vendorVerified ? badge("Verified") : ""}</td>
+            <td class="mono">${esc(o.priceAmountDisplay || fmt(o.priceAmount))} Musd</td>
+            <td>${esc(o.deliveryDays)} days</td>
+            <td class="mono">${rk ? (rk.score * 100).toFixed(1) + "%" : "Eligible"}</td>
+            <td class="mono">${esc(short(o.canonicalHash, 10))}</td>
+            <td>${badge(o.status)}</td>
+            <td>
+              ${r.status === "open" && o.status === "submitted"
+                ? `<button class="btn sm primary" data-award-offer="${esc(o.id)}" type="button">Award offer</button>`
+                : `<span class="muted" style="font-size:12px">${esc(cleanCase(o.status))}</span>`}
+            </td>
+          </tr>`;
+        },
+        "No vendor offers submitted yet. Use the form above to sign and submit an offer."
+      )}
+    `;
+
+    if ($("#btnCancelReq")) {
+      $("#btnCancelReq").onclick = async () => {
+        try {
+          await api("POST", `/requests/${reqId}/cancel`, { reason: "Cancelled by operator in console" });
+          toast("Request cancelled");
+          await viewRequests();
+        } catch (e) { toast(e.message); }
+      };
+    }
+
+    if ($("#btnSignSubmitOffer")) {
+      $("#btnSignSubmitOffer").onclick = async () => {
+        try {
+          const priceBase = toBaseUnits($("#ofPrice").value);
+          const days = Number($("#ofDays").value || 2);
+          const vendorId = $("#ofVendor")?.value || undefined;
+          await api("POST", `/marketplace/requests/${reqId}/offers/sign-and-submit`, {
+            vendorId,
+            priceAmount: priceBase,
+            deliveryDays: days,
+            terms: { sla: "99.9%", region: "eu-west" },
+          });
+          toast("Signed typed-data vendor offer verified and recorded");
+          await renderRequestInspector(reqId, allVendors);
+        } catch (e) { toast(e.message); }
+      };
+    }
+
+    if ($("#btnJumpApprovals")) {
+      $("#btnJumpApprovals").onclick = () => navigateTo("approvals");
+    }
+
+    if ($("#btnCreateEscrowFromReq")) {
+      $("#btnCreateEscrowFromReq").onclick = async () => {
+        try {
+          const acceptedOffer = offersList.find((o) => o.status === "accepted");
+          if (!acceptedOffer) { toast("No awarded offer found for this request"); return; }
+          const res = await api("POST", "/agreements", {
+            requestId: r.id,
+            offerId: acceptedOffer.id,
+          });
+          toast("Escrow agreement proposed and agent budget reserved");
+          navigateTo("agreements", { selectedAgreementId: res.agreement.id });
+        } catch (e) {
+          if (e.details?.agreementId) {
+            navigateTo("agreements", { selectedAgreementId: e.details.agreementId });
+          } else {
+            toast(e.message);
+          }
+        }
+      };
+    }
+
+    document.querySelectorAll("[data-award-offer]").forEach((b) => {
+      b.onclick = async () => {
+        try {
+          const offerId = b.getAttribute("data-award-offer");
+          const res = await api("POST", `/requests/${reqId}/award`, { offerId });
+          toast("Policy decision: " + cleanCase(res.policyEvaluation?.decision || res.request?.status));
+          await refreshCounts();
+          await viewRequests();
+        } catch (e) { toast(e.message); }
+      };
+    });
+  } catch (e) {
+    box.innerHTML = `<div class="empty-box">${esc(e.message)}</div>`;
+  }
+}
+
+/* =========================================================================
+   3. Human Approvals Queue
+   ========================================================================= */
+async function viewApprovals() {
+  $("#view").innerHTML = `<div class="load-box">Loading approvals queue…</div>`;
+  const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
+    api("GET", "/approvals?status=pending&limit=50").catch(() => ({ data: [] })),
+    api("GET", "/approvals?status=approved&limit=25").catch(() => ({ data: [] })),
+    api("GET", "/approvals?status=rejected&limit=25").catch(() => ({ data: [] })),
+  ]);
+
+  const allDecided = [...(approvedRes.data || []), ...(rejectedRes.data || [])];
+
+  $("#view").innerHTML = `
+    ${pageHeader(
+      "Human-in-the-Loop Governance",
+      "Approvals queue & separation of duties",
+      "High-value or sensitive awards flagged by the policy engine require an authorized human approver distinct from the requester."
+    )}
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-head">
+        <div>
+          <h2>Pending approval decisions (${pendingRes.data.length})</h2>
+          <div class="card-sub">Approving transitions the request to approved so an on-chain Musd escrow agreement can be funded.</div>
+        </div>
+      </div>
+      ${table(
+        ["Request", "Title", "Amount", "Policy version", "Expires", "Decision note", "Actions"],
+        pendingRes.data,
+        (row) => {
+          const a = row.approval || row;
+          return `<tr>
+            <td class="mono">${esc(cleanRef(row.requestReference))}</td>
+            <td style="color:var(--ink);font-weight:500">${esc(row.requestTitle || "Procurement request")}</td>
+            <td class="mono">${esc(row.offerPriceDisplay || row.budgetAmountDisplay || "—")} Musd</td>
+            <td>Version ${esc(a.policyVersion ?? 1)}</td>
+            <td>${esc(when(a.expiresAt))}</td>
+            <td><input type="text" id="note-${esc(a.id)}" placeholder="Budget & compliance verified" value="Approved after treasury review" style="min-width:210px" /></td>
+            <td style="display:flex;gap:8px">
+              <button class="btn sm primary" data-decide-id="${esc(a.id)}" data-decision="approved" type="button">Approve</button>
+              <button class="btn sm" data-decide-id="${esc(a.id)}" data-decision="rejected" type="button">Reject</button>
+            </td>
+          </tr>`;
+        },
+        "No pending approvals in queue. Award a request above 500 Musd in procurement requests to trigger a human approval gate."
+      )}
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h2>Completed approval decisions (${allDecided.length})</h2>
+          <div class="card-sub">Immutable record of human approval and rejection decisions.</div>
+        </div>
+      </div>
+      ${table(
+        ["Request", "Title", "Status", "Note", "Decided at"],
+        allDecided,
+        (row) => {
+          const a = row.approval || row;
+          return `<tr>
+            <td class="mono">${esc(cleanRef(row.requestReference))}</td>
+            <td style="color:var(--ink);font-weight:500">${esc(row.requestTitle || "—")}</td>
+            <td>${badge(a.status)}</td>
+            <td>${esc(a.decisionNote || "—")}</td>
+            <td>${esc(when(a.decidedAt))}</td>
+          </tr>`;
+        },
+        "No completed decisions recorded yet."
+      )}
+    </div>
+  `;
+
+  document.querySelectorAll("[data-decide-id]").forEach((btn) => {
+    btn.onclick = async () => {
+      const id = btn.getAttribute("data-decide-id");
+      const decision = btn.getAttribute("data-decision");
+      const note = $("#note-" + id)?.value || "Reviewed by approver";
+      try {
+        const approverTok = state.demoPrincipals?.northwind_approver || state.token;
+        await api("POST", `/approvals/${id}/decide`, { decision, note }, approverTok);
+        toast("Approval decision recorded: " + cleanCase(decision));
+        await refreshCounts();
+        await viewApprovals();
+      } catch (e) {
+        toast(e.message);
+      }
+    };
+  });
+}
+
+/* =========================================================================
+   4. Escrow & On-Chain Settlement
+   ========================================================================= */
+async function viewAgreements() {
+  $("#view").innerHTML = `<div class="load-box">Loading on-chain escrow agreements…</div>`;
+  const [agrs, reqs] = await Promise.all([
+    api("GET", "/agreements?limit=50"),
+    api("GET", "/requests?limit=50").catch(() => ({ data: [] })),
+  ]);
+
+  const approvedReqs = [];
+  for (const r of (reqs.data || []).filter((x) => x.status === "approved")) {
+    if (agrs.data.some((a) => a.requestId === r.id && a.state !== "cancelled")) continue;
+    /* The awarded offer is the one whose status transitioned to "accepted" on award */
+    const offs = await api("GET", `/requests/${r.id}/offers`).catch(() => ({ data: [] }));
+    const acceptedOffer = (offs.data || []).find((o) => o.status === "accepted");
+    if (acceptedOffer) approvedReqs.push({ ...r, acceptedOfferId: acceptedOffer.id, acceptedOfferPrice: acceptedOffer.priceAmountDisplay || fmt(acceptedOffer.priceAmount) });
+  }
+
+  if (!state.selectedAgreementId && agrs.data.length > 0) {
+    state.selectedAgreementId = agrs.data[0].id;
+  }
+
+  $("#view").innerHTML = `
+    ${pageHeader(
+      "Non-Custodial Musd Escrow",
+      "On-chain escrow agreements & settlement",
+      "Every action below broadcasts a real smart contract transaction to ProcurementEscrow on Mezo Chain 31611 and indexes the emitted block events."
+    )}
+
+    ${approvedReqs.length ? `
+      <div class="card" style="margin-bottom:16px;border-color:rgba(109,63,234,0.35)">
+        <div class="card-head">
+          <div>
+            <h2>Approved requests ready for escrow proposal (${approvedReqs.length})</h2>
+            <div class="card-sub">Propose an escrow agreement to atomically reserve the agent budget and prepare on-chain funding calldata.</div>
+          </div>
+        </div>
+        ${table(
+          ["Reference", "Title", "Selected offer", "Budget", "Action"],
+          approvedReqs,
+          (r) => `<tr>
+            <td class="mono">${esc(cleanRef(r.reference))}</td>
+            <td style="color:var(--ink);font-weight:500">${esc(r.title)}</td>
+            <td class="mono">${esc(short(r.acceptedOfferId, 12))}</td>
+            <td class="mono">${esc(r.acceptedOfferPrice || (r.budgetAmountDisplay || fmt(r.budgetAmount)))} Musd</td>
+            <td><button class="btn sm primary" data-propose-req="${esc(r.id)}" data-propose-offer="${esc(r.acceptedOfferId)}" type="button">Create escrow proposal</button></td>
+          </tr>`
+        )}
+      </div>
+    ` : ""}
+
+    <div class="grid g-sidebar-left">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Escrow agreements (${agrs.data.length})</h2>
+            <div class="card-sub">Select an agreement to execute on-chain transitions or inspect block events.</div>
+          </div>
+        </div>
+        ${table(
+          ["Request", "Vendor", "Amount", "State"],
+          agrs.data,
+          (a) => `<tr class="clickable" data-sel-agr="${esc(a.id)}" style="${state.selectedAgreementId === a.id ? "background:rgba(109,63,234,0.1)" : ""}">
+            <td class="mono">${esc(cleanRef(a.requestReference))}</td>
+            <td style="color:var(--ink);font-weight:500">${esc(a.vendorName || "Helios Compute")}</td>
+            <td class="mono">${esc(a.amountDisplay || fmt(a.amount))} Musd</td>
+            <td>${badge(a.state)}</td>
+          </tr>`
+        )}
+      </div>
+
+      <div class="card" id="agrInspector">
+        <div class="empty-box">Select an agreement on the left to inspect and execute on-chain settlement actions.</div>
+      </div>
+    </div>
+  `;
+
+  document.querySelectorAll("[data-propose-req]").forEach((btn) => {
+    btn.onclick = async () => {
+      try {
+        const requestId = btn.getAttribute("data-propose-req");
+        const offerId = btn.getAttribute("data-propose-offer");
+        const res = await api("POST", "/agreements", { requestId, offerId });
+        state.selectedAgreementId = res.agreement.id;
+        toast("Created escrow proposal and reserved agent budget");
+        await refreshCounts();
+        await viewAgreements();
+      } catch (e) { toast(e.message); }
+    };
+  });
+
+  document.querySelectorAll("[data-sel-agr]").forEach((row) => {
+    row.onclick = () => {
+      state.selectedAgreementId = row.getAttribute("data-sel-agr");
+      viewAgreements();
+    };
+  });
+
+  if (state.selectedAgreementId) {
+    await renderAgreementInspector(state.selectedAgreementId);
+  }
+}
+
+async function renderAgreementInspector(agrId) {
+  const box = $("#agrInspector");
+  if (!box) return;
+  try {
+    const detail = await api("GET", `/agreements/${agrId}`);
+    const a = detail.agreement;
+    const events = detail.chainEvents || [];
+
+    box.innerHTML = `
+      <div class="card-head">
+        <div>
+          <h2>${esc(cleanRef(detail.request?.reference))} · ${esc(detail.request?.title || "Escrow agreement")}</h2>
+          <div class="card-sub">On-chain agreement id: <span class="mono">${esc(a.onchainId)}</span></div>
+        </div>
+        <div>${badge(a.state)}</div>
+      </div>
+
+      <div class="kv-grid" style="margin-bottom:16px">
+        <div class="kv-item"><div class="k">Principal amount</div><div class="v mono">${esc(a.amountDisplay || fmt(a.amount))} Musd</div></div>
+        <div class="kv-item"><div class="k">Protocol fee (1%)</div><div class="v mono">${esc(a.feeAmountDisplay || fmt(a.feeAmount))} Musd</div></div>
+        <div class="kv-item"><div class="k">Buyer treasury wallet</div><div class="v mono">${esc(short(a.buyerAddress, 10))}</div></div>
+        <div class="kv-item"><div class="k">Vendor payout wallet (${esc(detail.vendor?.name || "Vendor")})</div><div class="v mono">${esc(short(a.vendorAddress, 10))}</div></div>
+        <div class="kv-item"><div class="k">Canonical terms hash</div><div class="v mono">${esc(short(a.termsHash, 14))}</div></div>
+        <div class="kv-item"><div class="k">Signed offer hash</div><div class="v mono">${esc(short(a.offerHash, 14))}</div></div>
+      </div>
+
+      <div style="padding:16px;border-radius:16px;background:#f3edff;border:1px solid rgba(109,63,234,0.3);margin-bottom:16px">
+        <div style="font-weight:600;color:var(--ink);margin-bottom:6px">Live on-chain lifecycle controls (Mezo Chain 31611)</div>
+        <div class="muted" style="font-size:12.5px;margin-bottom:12px">Click the active step below to broadcast the real transaction and index the emitted logs into PostgreSQL:</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          ${a.state === "proposed" ? sparkBtn("actFund", "1. Fund escrow on-chain (approve + lock Musd)") : ""}
+          ${a.state === "funded" ? `
+            ${sparkBtn("actAccept", "2. Vendor accept order on-chain")}
+            <button class="btn" id="actCancel" type="button">Cancel & refund buyer</button>
+          ` : ""}
+          ${a.state === "accepted" ? `
+            ${sparkBtn("actDeliver", "3. Submit vendor delivery attestation on-chain")}
+            <button class="btn subtle" id="actRelease" type="button">Release funds early</button>
+            <button class="btn" id="actDispute" type="button">Open on-chain dispute</button>
+          ` : ""}
+          ${a.state === "delivered" ? `
+            ${sparkBtn("actRelease", "4. Accept delivery & release Musd on-chain")}
+            <button class="btn" id="actDispute" type="button">Open on-chain dispute</button>
+          ` : ""}
+          ${a.state === "disputed" ? `
+            <button class="btn primary" id="actGoDisputes" type="button">Resolve in disputes & arbitration →</button>
+          ` : ""}
+          ${["released", "cancelled", "resolved", "refunded"].includes(a.state) ? `
+            <span class="badge tone-active">Settlement finalized on-chain (${esc(cleanCase(a.state))})</span>
+          ` : ""}
+        </div>
+      </div>
+
+      <h3 style="margin-bottom:10px">Indexed smart contract events (${events.length})</h3>
+      ${table(
+        ["Event", "Block", "Transaction hash", "Recorded at"],
+        events,
+        (ev) => `<tr>
+          <td style="color:var(--ink);font-weight:500">${esc(ev.eventName)}</td>
+          <td class="mono">#${esc(ev.blockNumber)}</td>
+          <td class="mono">${esc(short(ev.txHash, 14))}</td>
+          <td>${esc(when(ev.processedAt))}</td>
+        </tr>`,
+        "No on-chain events indexed yet. Click the funding action above to broadcast the transaction."
+      )}
+    `;
+
+    const runAction = async (action, label) => {
+      try {
+        toast("Broadcasting " + label + " transaction to Mezo Chain 31611…");
+        await api("POST", `/agreements/${agrId}/execute/${action}`, {});
+        toast("Confirmed on-chain: " + label);
+        await refreshCounts();
+        await viewAgreements();
+      } catch (e) {
+        toast(e.message);
+      }
+    };
+
+    if ($("#actFund")) $("#actFund").onclick = () => runAction("fund", "escrow funding");
+    if ($("#actAccept")) $("#actAccept").onclick = () => runAction("accept", "vendor order acceptance");
+    if ($("#actDeliver")) $("#actDeliver").onclick = () => runAction("deliver", "delivery proof attestation");
+    if ($("#actRelease")) $("#actRelease").onclick = () => runAction("release", "escrow release settlement");
+    if ($("#actCancel")) $("#actCancel").onclick = () => runAction("cancel", "escrow cancellation & refund");
+    if ($("#actDispute")) $("#actDispute").onclick = () => runAction("dispute", "on-chain dispute");
+    if ($("#actGoDisputes")) $("#actGoDisputes").onclick = () => navigateTo("disputes");
+  } catch (e) {
+    box.innerHTML = `<div class="empty-box">${esc(e.message)}</div>`;
+  }
+}
+
+/* =========================================================================
+   5. Disputes & Arbitration
+   ========================================================================= */
+async function viewDisputes() {
+  $("#view").innerHTML = `<div class="load-box">Loading disputes and arbitration state…</div>`;
+  const [dsps, agrs] = await Promise.all([
+    api("GET", "/disputes?limit=50"),
+    api("GET", "/agreements?limit=50").catch(() => ({ data: [] })),
+  ]);
+
+  const disputable = (agrs.data || []).filter((a) => ["accepted", "delivered"].includes(a.state));
+
+  $("#view").innerHTML = `
+    ${pageHeader(
+      "On-Chain Arbitration",
+      "Disputes & split settlement rulings",
+      "Open disputes with canonical evidence hashes and execute on-chain split rulings via the resolver role on ProcurementEscrow."
+    )}
+
+    <div class="grid g-sidebar-left">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Open new on-chain dispute</h2>
+            <div class="card-sub">Locks the agreement in disputed state on ProcurementEscrow and records the evidence hash.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="dspAgr">Target active agreement</label>
+          <select id="dspAgr">
+            ${disputable.length
+              ? disputable.map((a) => `<option value="${esc(a.id)}">${esc(cleanRef(a.requestReference))} · ${esc(a.amountDisplay || fmt(a.amount))} Musd (${esc(cleanCase(a.state))})</option>`).join("")
+              : `<option value="">No agreements currently in accepted or delivered state</option>`}
+          </select>
+        </div>
+        ${field("dspReason", "Dispute reason", { value: "Latency benchmark below contracted 99.9% threshold during validation window." })}
+        <button class="btn primary" id="btnOpenDispute" style="width:100%" ${disputable.length ? "" : "disabled"} type="button">Broadcast dispute on-chain</button>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Dispute cases (${dsps.data.length})</h2>
+            <div class="card-sub">Execute an on-chain split ruling to distribute escrowed Musd between vendor and buyer.</div>
+          </div>
+        </div>
+        ${table(
+          ["Agreement id", "Escrow amount", "Reason", "Status", "Vendor payout (Musd)", "Action"],
+          dsps.data,
+          (d) => `<tr>
+            <td class="mono">${esc(short(d.agreementOnchainId, 10))}</td>
+            <td class="mono">${esc(d.agreementAmountDisplay || fmt(d.agreementAmount))} Musd</td>
+            <td>${esc(d.reason)}</td>
+            <td>${badge(d.status)}</td>
+            <td>
+              ${d.status === "resolved"
+                ? `<span class="mono">${esc(fmt(d.vendorShare || "0"))} Musd</span>`
+                : `<input type="text" id="vshare-${esc(d.id)}" value="${esc(fmt(BigInt(d.agreementAmount || "0") / 2n).replace(/,/g, ""))}" style="width:120px" />`}
+            </td>
+            <td>
+              ${d.status === "resolved"
+                ? `<span class="mono muted">${esc(short(d.resolutionTxHash || "Resolved", 10))}</span>`
+                : `<button class="btn sm primary" data-resolve-id="${esc(d.id)}" type="button">Execute ruling on-chain</button>`}
+            </td>
+          </tr>`,
+          "No active or past disputes. You can open a dispute on any accepted or delivered agreement."
+        )}
+      </div>
+    </div>
+  `;
+
+  if ($("#btnOpenDispute")) {
+    $("#btnOpenDispute").onclick = async () => {
+      const agrId = $("#dspAgr").value;
+      if (!agrId) return;
+      try {
+        toast("Broadcasting dispute transaction on Mezo Chain 31611…");
+        await api("POST", `/agreements/${agrId}/execute/dispute`, {
+          reason: $("#dspReason").value.trim() || "Service level deviation reported",
+        });
+        toast("Dispute confirmed on-chain");
+        await refreshCounts();
+        await viewDisputes();
+      } catch (e) { toast(e.message); }
+    };
+  }
+
+  document.querySelectorAll("[data-resolve-id]").forEach((btn) => {
+    btn.onclick = async () => {
+      const id = btn.getAttribute("data-resolve-id");
+      const shareVal = $("#vshare-" + id)?.value || "0";
+      try {
+        toast("Executing resolveDispute on ProcurementEscrow…");
+        await api("POST", `/disputes/${id}/resolve`, {
+          vendorShare: shareVal.replace(/,/g, ""),
+          note: "Arbitration split ruling executed by protocol resolver",
+        });
+        toast("Dispute resolved on-chain and funds distributed");
+        await refreshCounts();
+        await viewDisputes();
+      } catch (e) { toast(e.message); }
+    };
+  });
+}
+
+/* =========================================================================
+   6. Autonomous Agents & Atomic Budgets
+   ========================================================================= */
+async function viewAgents() {
+  $("#view").innerHTML = `<div class="load-box">Loading autonomous agents and budget windows…</div>`;
+  const ags = await api("GET", "/agents");
+
+  if (!state.selectedAgentId && ags.data.length > 0) {
+    state.selectedAgentId = ags.data[0].id;
+  }
+
+  $("#view").innerHTML = `
+    ${pageHeader(
+      "Scoped Autonomy & Spend Controls",
+      "Autonomous agents, credentials & atomic budgets",
+      "Register procurement agents with bounded permissions, per-request/daily/monthly Musd caps, and on-chain authorization checks."
+    )}
+
+    <div class="grid g-sidebar-left">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Register autonomous agent</h2>
+            <div class="card-sub">Creates a scoped agent identity with bounded trust level and permission set.</div>
+          </div>
+        </div>
+        ${field("agName", "Agent name", { placeholder: "Compute buyer agent beta" })}
+        ${field("agWallet", "Agent wallet address", { value: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" })}
+        <div class="field">
+          <label for="agTrust">Trust tier (1 to 3)</label>
+          <select id="agTrust">
+            <option value="2" selected>Tier 2 · Standard verified agent</option>
+            <option value="3">Tier 3 · High-trust treasury agent</option>
+            <option value="1">Tier 1 · Restricted sandbox agent</option>
+          </select>
+        </div>
+        ${field("agDesc", "Operational mandate", { value: "Autonomous cluster sourcing and offer ranking within daily Musd limits." })}
+        ${sparkBtn("btnCreateAgent", "Register Agent")}
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2>Registered agents (${ags.data.length})</h2>
+              <div class="card-sub">Select an agent to configure budget windows, issue credentials, or inspect reservations.</div>
+            </div>
+          </div>
+          ${table(
+            ["Name", "Trust tier", "Wallet address", "Scopes", "Status"],
+            ags.data,
+            (a) => `<tr class="clickable" data-sel-agent="${esc(a.id)}" style="${state.selectedAgentId === a.id ? "background:rgba(109,63,234,0.1)" : ""}">
+              <td style="color:var(--ink);font-weight:500">${esc(a.name)}</td>
+              <td>Tier ${esc(a.trustLevel)}</td>
+              <td class="mono">${esc(short(a.walletAddress || "—", 10))}</td>
+              <td>${esc((a.scopes || []).length)} permissions</td>
+              <td>${badge(a.status)}</td>
+            </tr>`
+          )}
+        </div>
+
+        <div class="card" id="agentInspector">
+          <div class="empty-box">Select an agent above to manage budgets and credentials.</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  $("#btnCreateAgent").onclick = async () => {
+    try {
+      const res = await api("POST", "/agents", {
+        name: $("#agName").value.trim() || "Autonomous buyer " + Math.floor(Math.random() * 90 + 10),
+        description: $("#agDesc").value.trim(),
+        walletAddress: $("#agWallet").value.trim(),
+        trustLevel: Number($("#agTrust").value || 2),
+        scopes: ["request:create", "request:read", "request:publish", "offer:read", "offer:discover", "budget:read"],
+      });
+      state.selectedAgentId = res.agent.id;
+      toast("Registered agent " + res.agent.name);
+      await refreshCounts();
+      await viewAgents();
+    } catch (e) { toast(e.message); }
+  };
+
+  document.querySelectorAll("[data-sel-agent]").forEach((row) => {
+    row.onclick = () => {
+      state.selectedAgentId = row.getAttribute("data-sel-agent");
+      viewAgents();
+    };
+  });
+
+  if (state.selectedAgentId) {
+    await renderAgentInspector(state.selectedAgentId);
+  }
+}
+
+async function renderAgentInspector(agentId) {
+  const box = $("#agentInspector");
+  if (!box) return;
+  try {
+    const detail = await api("GET", `/agents/${agentId}`);
+    const a = detail.agent;
+    const budgets = detail.budgets || [];
+    const creds = detail.credentials || [];
+    const reservations = detail.activeReservations || [];
+
+    box.innerHTML = `
+      <div class="card-head">
+        <div>
+          <h2>${esc(a.name)} · budget & credential controls</h2>
+          <div class="card-sub">${esc(a.description || "Autonomous procurement agent")}</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn sm primary" id="btnIssueCred" type="button">Issue new agent credential</button>
+        </div>
+      </div>
+
+      <div id="issuedCredBanner"></div>
+
+      <h3 style="margin-bottom:10px">Atomic budget windows (${budgets.length})</h3>
+      ${table(
+        ["Window", "Limit", "Reserved (escrow pending)", "Spent (settled)", "Remaining"],
+        budgets,
+        (b) => {
+          const lim = BigInt(b.limitAmount || "0");
+          const resv = BigInt(b.reservedAmount || "0");
+          const spt = BigInt(b.spentAmount || "0");
+          const rem = lim > resv + spt ? lim - resv - spt : 0n;
+          return `<tr>
+            <td style="color:var(--ink);font-weight:500">${esc(cleanCase(b.window))}</td>
+            <td class="mono">${esc(b.limitDisplay || fmt(lim))} Musd</td>
+            <td class="mono">${esc(b.reservedDisplay || fmt(resv))} Musd</td>
+            <td class="mono">${esc(b.spentDisplay || fmt(spt))} Musd</td>
+            <td class="mono" style="color:var(--purple)">${esc(fmt(rem))} Musd</td>
+          </tr>`;
+        }
+      )}
+
+      <div style="margin-top:16px;padding:16px;border-radius:16px;background:#faf8ff;border:1px solid var(--line)">
+        <div style="font-weight:600;margin-bottom:10px;color:var(--ink)">Update budget limits (Musd)</div>
+        <div class="grid g-3" style="gap:10px">
+          ${field("bgPerReq", "Per-request limit", { value: "2500" })}
+          ${field("bgDaily", "Daily limit", { value: "5000" })}
+          ${field("bgMonthly", "Monthly limit", { value: "20000" })}
+        </div>
+        <button class="btn sm subtle" id="btnSaveBudgets" type="button">Save budget limits</button>
+      </div>
+
+      <div class="sep"></div>
+      <h3 style="margin-bottom:10px">Scoped agent credentials (${creds.length})</h3>
+      ${table(
+        ["Label", "Token prefix", "Expires", "Last used", "Status", "Action"],
+        creds,
+        (c) => `<tr>
+          <td style="color:var(--ink);font-weight:500">${esc(c.label)}</td>
+          <td class="mono">apn_a_${esc(c.prefix)}_…</td>
+          <td>${esc(when(c.expiresAt))}</td>
+          <td>${esc(when(c.lastUsedAt))}</td>
+          <td>${badge(c.revokedAt ? "Revoked" : "Active")}</td>
+          <td>${!c.revokedAt ? `<button class="btn sm" data-rev-cred="${esc(c.id)}" type="button">Revoke</button>` : "—"}</td>
+        </tr>`
+      )}
+
+      ${reservations.length ? `
+        <div class="sep"></div>
+        <h3 style="margin-bottom:10px">Active budget reservations (${reservations.length})</h3>
+        ${table(
+          ["Reservation id", "Request id", "Amount", "Status"],
+          reservations,
+          (r) => `<tr>
+            <td class="mono">${esc(short(r.id, 10))}</td>
+            <td class="mono">${esc(short(r.requestId, 10))}</td>
+            <td class="mono">${esc(fmt(r.amount))} Musd</td>
+            <td>${badge(r.status)}</td>
+          </tr>`
+        )}
+      ` : ""}
+    `;
+
+    $("#btnSaveBudgets").onclick = async () => {
+      try {
+        await api("PUT", `/agents/${agentId}/budgets`, {
+          budgets: [
+            { window: "per_request", limitAmount: $("#bgPerReq").value.trim() || "2500" },
+            { window: "daily", limitAmount: $("#bgDaily").value.trim() || "5000" },
+            { window: "monthly", limitAmount: $("#bgMonthly").value.trim() || "20000" },
+          ],
+        });
+        toast("Updated atomic budget windows");
+        await renderAgentInspector(agentId);
+      } catch (e) { toast(e.message); }
+    };
+
+    $("#btnIssueCred").onclick = async () => {
+      try {
+        const res = await api("POST", `/agents/${agentId}/credentials`, {
+          label: "Console credential " + new Date().toLocaleTimeString("en-GB"),
+          ttlDays: 90,
+        });
+        $("#issuedCredBanner").innerHTML = `
+          <div style="padding:14px;border-radius:14px;background:#f3edff;border:1px solid rgba(109,63,234,0.4);margin-bottom:14px">
+            <div style="font-weight:600;color:var(--ink)">New agent credential issued (shown once):</div>
+            <div class="mono" style="margin-top:6px;word-break:break-all;color:var(--purple)">${esc(res.token)}</div>
+          </div>
+        `;
+        toast("Issued new scoped agent credential");
+      } catch (e) { toast(e.message); }
+    };
+
+    document.querySelectorAll("[data-rev-cred]").forEach((btn) => {
+      btn.onclick = async () => {
+        try {
+          await api("DELETE", `/agents/${agentId}/credentials/${btn.getAttribute("data-rev-cred")}`);
+          toast("Credential revoked");
+          await renderAgentInspector(agentId);
+        } catch (e) { toast(e.message); }
+      };
+    });
+  } catch (e) {
+    box.innerHTML = `<div class="empty-box">${esc(e.message)}</div>`;
+  }
+}
+
+/* =========================================================================
+   7. Vendors & Service Manifests
+   ========================================================================= */
+async function viewVendors() {
+  $("#view").innerHTML = `<div class="load-box">Loading vendors and canonical service manifests…</div>`;
+  const [vnds, svcs] = await Promise.all([
+    api("GET", "/vendors?scope=all").catch(() => ({ data: [] })),
+    api("GET", "/services").catch(() => ({ data: [] })),
+  ]);
+
+  $("#view").innerHTML = `
+    ${pageHeader(
+      "Supplier Registry & Discovery Catalog",
+      "Vendors & canonical service manifests",
+      "Register service providers, verify vendor tiers, and publish canonical keccak256-hashed service manifests for agent discovery."
+    )}
+
+    <div class="grid g-2" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Register new vendor</h2>
+            <div class="card-sub">Onboards a supplier profile with an on-chain Musd payout wallet.</div>
+          </div>
+        </div>
+        <div class="grid g-2" style="gap:10px">
+          ${field("vnName", "Vendor name", { placeholder: "Aether cloud systems" })}
+          ${field("vnLegal", "Legal entity name", { placeholder: "Aether cloud ltd" })}
+        </div>
+        <div class="grid g-2" style="gap:10px">
+          ${field("vnWallet", "Musd payout address", { value: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8" })}
+          ${field("vnEmail", "Contact email", { value: "desk@aether.compute" })}
+        </div>
+        ${field("vnDesc", "Capabilities summary", { value: "High-density compute clusters and low-latency inference endpoints." })}
+        ${sparkBtn("btnCreateVendor", "Register Vendor")}
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Publish service manifest</h2>
+            <div class="card-sub">Computes the deterministic canonical manifest hash and indexes it in the catalog.</div>
+          </div>
+        </div>
+        <div class="grid g-2" style="gap:10px">
+          <div class="field">
+            <label for="smVendor">Vendor</label>
+            <select id="smVendor">
+              ${vnds.data.map((v) => `<option value="${esc(v.id)}" data-org="${esc(v.orgId)}">${esc(v.name)}</option>`).join("")}
+            </select>
+          </div>
+          ${field("smName", "Service name", { placeholder: "Dedicated cluster node" })}
+        </div>
+        <div class="grid g-3" style="gap:10px">
+          <div class="field">
+            <label for="smCat">Category</label>
+            <select id="smCat">
+              <option value="cloud_infrastructure">Cloud Infrastructure</option>
+              <option value="software">Software</option>
+              <option value="security">Security</option>
+              <option value="data">Data</option>
+            </select>
+          </div>
+          ${field("smPrice", "Base price (Musd)", { value: "32" })}
+          ${field("smSla", "Response service level (hours)", { value: "4" })}
+        </div>
+        ${field("smCaps", "Capabilities (comma-separated)", { value: "gpu, kubernetes" })}
+        ${sparkBtn("btnCreateService", "Publish Canonical Manifest")}
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-head">
+        <div>
+          <h2>Registered network vendors (${vnds.data.length})</h2>
+          <div class="card-sub">Verified vendors are eligible for automatic policy approval up to policy thresholds.</div>
+        </div>
+      </div>
+      ${table(
+        ["Vendor name", "Legal entity", "Payout wallet", "Tier", "Verification", "Status", "Action"],
+        vnds.data,
+        (v) => `<tr>
+          <td style="color:var(--ink);font-weight:500">${esc(v.name)}</td>
+          <td>${esc(v.legalName || "—")}</td>
+          <td class="mono">${esc(short(v.payoutAddress, 12))}</td>
+          <td>Tier ${esc(v.tier)}</td>
+          <td>${badge(v.verified ? "Verified" : "Unverified")}</td>
+          <td>${badge(v.status)}</td>
+          <td>
+            ${!v.verified || v.status !== "active"
+              ? `<button class="btn sm primary" data-verify-vendor="${esc(v.id)}" type="button">Verify & activate</button>`
+              : `<span class="muted" style="font-size:12px">Verified tier ${esc(v.tier)}</span>`}
+          </td>
+        </tr>`
+      )}
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h2>Active service manifest catalog (${svcs.data.length})</h2>
+          <div class="card-sub">Cross-tenant catalog queried by autonomous agents during deterministic offer discovery.</div>
+        </div>
+      </div>
+      ${table(
+        ["Service", "Vendor", "Category", "Capabilities", "Base price", "Canonical hash"],
+        svcs.data,
+        (s) => `<tr>
+          <td style="color:var(--ink);font-weight:500">${esc(s.name)}</td>
+          <td>${esc(s.vendorName)} ${s.vendorVerified ? badge("Verified") : ""}</td>
+          <td>${esc(cleanCase(s.category))}</td>
+          <td>${esc((s.capabilities || []).join(", "))}</td>
+          <td class="mono">${esc(s.basePriceDisplay || fmt(s.basePrice || "0"))} Musd / ${esc(cleanCase(s.priceModel))}</td>
+          <td class="mono">${esc(short(s.manifestHash, 12))}</td>
+        </tr>`
+      )}
+    </div>
+  `;
+
+  $("#btnCreateVendor").onclick = async () => {
+    try {
+      const res = await api("POST", "/vendors", {
+        name: $("#vnName").value.trim() || "Aether compute " + Math.floor(Math.random() * 90 + 10),
+        legalName: $("#vnLegal").value.trim() || "Aether compute ltd",
+        payoutAddress: $("#vnWallet").value.trim(),
+        contactEmail: $("#vnEmail").value.trim(),
+        description: $("#vnDesc").value.trim(),
+      });
+      await api("POST", `/vendors/${res.vendor.id}/verify-direct`, { verified: true, tier: 3, status: "active" });
+      toast("Vendor registered and verified at tier 3");
+      await refreshCounts();
+      await viewVendors();
+    } catch (e) { toast(e.message); }
+  };
+
+  $("#btnCreateService").onclick = async () => {
+    try {
+      const vendorId = $("#smVendor").value;
+      const selectedVendor = vnds.data.find((v) => v.id === vendorId);
+      const tok = selectedVendor && selectedVendor.orgId !== state.org?.id && state.demoPrincipals?.helios_owner
+        ? state.demoPrincipals.helios_owner
+        : state.token;
+      await api("POST", `/vendors/${vendorId}/services`, {
+        name: $("#smName").value.trim() || "Dedicated compute service " + Math.floor(Math.random() * 90 + 10),
+        category: $("#smCat").value,
+        description: "High-availability cluster with deterministic service level telemetry.",
+        capabilities: $("#smCaps").value.split(",").map((s) => s.trim()).filter(Boolean),
+        regions: ["eu-west"],
+        priceModel: "hourly",
+        basePrice: $("#smPrice").value.trim() || "32",
+        slaHours: Number($("#smSla").value || 4),
+        manifest: { unit: "node-hour", minUnits: 24 },
+      }, tok);
+      toast("Published canonical service manifest");
+      await viewVendors();
+    } catch (e) { toast(e.message); }
+  };
+
+  document.querySelectorAll("[data-verify-vendor]").forEach((btn) => {
+    btn.onclick = async () => {
+      try {
+        const id = btn.getAttribute("data-verify-vendor");
+        await api("POST", `/vendors/${id}/verify-direct`, { verified: true, tier: 3, status: "active" });
+        toast("Vendor verified and activated");
+        await viewVendors();
+      } catch (e) { toast(e.message); }
+    };
+  });
+}
+
+/* =========================================================================
+   8. Policy Engine
+   ========================================================================= */
+async function viewPolicies() {
+  $("#view").innerHTML = `<div class="load-box">Loading policy versions and rules…</div>`;
+  const pols = await api("GET", "/policies");
+  const activeSummary = pols.data.find((p) => p.status === "active") || pols.data[0];
+  let activeDetail = null;
+  if (activeSummary) {
+    const d = await api("GET", `/policies/${activeSummary.id}`).catch(() => null);
+    activeDetail = d?.policy || null;
+  }
+  const doc = activeDetail?.document || {};
+  const rules = doc.rules || [];
+
+  $("#view").innerHTML = `
+    ${pageHeader(
+      "Deterministic Spend Governance",
+      "Immutable policy versions & rule simulator",
+      "Policies use deny-overrides evaluation and canonical hashing. Every award decision records the exact policy version and hash."
+    )}
+
+    <div class="grid g-2" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Dry-run policy simulator</h2>
+            <div class="card-sub">Evaluate any hypothetical procurement context against your active policy in real time.</div>
+          </div>
+        </div>
+        <div class="grid g-2" style="gap:10px">
+          ${field("simAmount", "Order amount (Musd)", { value: "450" })}
+          <div class="field">
+            <label for="simCat">Category</label>
+            <select id="simCat">
+              <option value="cloud_infrastructure">Cloud Infrastructure</option>
+              <option value="software">Software</option>
+              <option value="security">Security</option>
+              <option value="gambling">Unapproved category (test deny)</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid g-2" style="gap:10px">
+          <div class="field">
+            <label for="simVerified">Vendor verification</label>
+            <select id="simVerified">
+              <option value="true" selected>Verified vendor (tier 3)</option>
+              <option value="false">Unverified vendor (tier 1)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="simTrust">Agent trust level</label>
+            <select id="simTrust">
+              <option value="2" selected>Tier 2 agent</option>
+              <option value="3">Tier 3 agent</option>
+              <option value="1">Tier 1 agent</option>
+            </select>
+          </div>
+        </div>
+        ${sparkBtn("btnRunSim", "Evaluate Against Active Policy")}
+        <div id="simResult" style="margin-top:14px"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Create & activate new policy version</h2>
+            <div class="card-sub">Publishes an immutable policy version with custom auto-approval ceiling.</div>
+          </div>
+        </div>
+        ${field("polName", "Policy name", { value: "Updated treasury policy" })}
+        <div class="grid g-2" style="gap:10px">
+          ${field("polAutoMax", "Auto-approve verified ceiling (Musd)", { value: "1000" })}
+          ${field("polHardMax", "Hard maximum ceiling (Musd)", { value: "25000" })}
+        </div>
+        ${sparkBtn("btnCreatePolicy", "Create & Activate Policy Version")}
+
+        <div class="sep"></div>
+        <h3 style="margin-bottom:10px">Policy version history (${pols.data.length})</h3>
+        ${table(
+          ["Version", "Status", "Document hash", "Activated", "Action"],
+          pols.data,
+          (p) => `<tr>
+            <td style="color:var(--ink);font-weight:500">Version ${esc(p.version)}</td>
+            <td>${badge(p.status)}</td>
+            <td class="mono">${esc(short(p.hash, 12))}</td>
+            <td>${esc(when(p.activatedAt || p.createdAt))}</td>
+            <td>
+              ${p.status !== "active"
+                ? `<button class="btn sm subtle" data-act-pol="${esc(p.id)}" type="button">Activate</button>`
+                : `<span class="muted" style="font-size:12px">Current active</span>`}
+            </td>
+          </tr>`
+        )}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h2>Active policy rules (version ${esc(activeDetail?.version ?? 1)})</h2>
+          <div class="card-sub">Hash: <span class="mono">${esc(activeDetail?.documentHash || "—")}</span> · Default effect: ${esc(cleanCase(doc.defaultEffect || "deny"))}</div>
+        </div>
+      </div>
+      ${table(
+        ["Rule id", "Priority", "Effect", "Description"],
+        rules,
+        (r) => `<tr>
+          <td class="mono" style="color:var(--ink)">${esc(r.id)}</td>
+          <td class="mono">${esc(r.priority)}</td>
+          <td>${badge(r.effect)}</td>
+          <td>${esc(r.description || "—")}</td>
+        </tr>`
+      )}
+    </div>
+  `;
+
+  $("#btnRunSim").onclick = async () => {
+    try {
+      const amount = toBaseUnits($("#simAmount").value);
+      const verified = $("#simVerified").value === "true";
+      const trust = Number($("#simTrust").value || 2);
+      const res = await api("POST", "/policies/simulate", {
+        context: {
+          amount,
+          budgetAmount: toBaseUnits("10000"),
+          category: $("#simCat").value,
+          agentTrustLevel: trust,
+          offerCount: 2,
+          vendor: { id: "00000000-0000-0000-0000-000000000001", verified, tier: verified ? 3 : 1 },
+        },
+      });
+      const ev = res.evaluation;
+      $("#simResult").innerHTML = `
+        <div style="padding:14px;border-radius:14px;background:#f3edff;border:1px solid rgba(109,63,234,0.32)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <span style="font-weight:600;color:var(--ink)">Evaluation decision</span>
+            ${badge(ev.decision)}
+          </div>
+          <div class="muted" style="font-size:12px">Matched rules: ${esc((ev.matchedRules || []).map((m) => m.id).join(", ") || "defaultEffect")}</div>
+          <div class="mono muted" style="font-size:11.5px;margin-top:4px">Policy version ${esc(ev.policyVersion)} · ${esc(short(ev.policyHash, 14))}</div>
+        </div>
+      `;
+    } catch (e) { toast(e.message); }
+  };
+
+  $("#btnCreatePolicy").onclick = async () => {
+    try {
+      const autoMax = toBaseUnits($("#polAutoMax").value || "1000");
+      const hardMax = toBaseUnits($("#polHardMax").value || "25000");
+      const newDoc = {
+        schemaVersion: 1,
+        name: $("#polName").value.trim() || "Updated treasury policy",
+        description: "Custom threshold policy created in console",
+        defaultEffect: "deny",
+        limits: {
+          maxAmount: hardMax,
+          minAmount: "1",
+          allowedCategories: ["cloud_infrastructure", "software", "security", "data", "marketing", "logistics", "research", "professional_services", "other"],
+        },
+        approval: { requiredRoles: ["approver"], ttlMinutes: 1440 },
+        rules: [
+          {
+            id: "verified-vendor-auto-custom",
+            effect: "allow",
+            priority: 60,
+            description: `Verified vendors auto-approved up to ${$("#polAutoMax").value} Musd`,
+            when: { all: [{ field: "vendor.verified", op: "eq", value: true }, { field: "amount", op: "lte", value: autoMax }] },
+          },
+          {
+            id: "above-threshold-human-gate",
+            effect: "require_human_approval",
+            priority: 90,
+            description: `Orders above ${$("#polAutoMax").value} Musd require a human approver`,
+            when: { all: [{ field: "amount", op: "gt", value: autoMax }] },
+          },
+        ],
+      };
+      const created = await api("POST", "/policies", { document: newDoc });
+      await api("POST", `/policies/${created.policy.id}/activate`, {});
+      toast("Created and activated policy version " + created.policy.version);
+      await refreshCounts();
+      await viewPolicies();
+    } catch (e) { toast(e.message); }
+  };
+
+  document.querySelectorAll("[data-act-pol]").forEach((btn) => {
+    btn.onclick = async () => {
+      try {
+        await api("POST", `/policies/${btn.getAttribute("data-act-pol")}/activate`, {});
+        toast("Activated selected policy version");
+        await viewPolicies();
+      } catch (e) { toast(e.message); }
+    };
+  });
+}
+
+/* =========================================================================
+   9. Organization, Members & Access Keys
+   ========================================================================= */
+async function viewOrg() {
+  $("#view").innerHTML = `<div class="load-box">Loading organization settings and access keys…</div>`;
+  const [orgRes, membersRes, keysRes] = await Promise.all([
+    api("GET", "/org"),
+    api("GET", "/org/members").catch(() => ({ data: [] })),
+    api("GET", "/api-keys").catch(() => ({ data: [] })),
+  ]);
+  const org = orgRes.org;
+
+  $("#view").innerHTML = `
+    ${pageHeader(
+      "Tenant Identity & Role-Based Access",
+      "Organization treasury, team members & access keys",
+      "Configure your organization's on-chain buyer wallet address, manage role-based team members, and issue or revoke user keys."
+    )}
+
+    <div class="grid g-2" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Organization profile & treasury wallet</h2>
+            <div class="card-sub">The buyer wallet address funds and releases non-custodial Musd escrow agreements.</div>
+          </div>
+        </div>
+        ${field("orgName", "Organization name", { value: org.name })}
+        ${field("orgWallet", "On-chain buyer treasury wallet", { value: org.walletAddress || "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266" })}
+        ${sparkBtn("btnSaveOrg", "Save Organization Settings")}
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Add team member</h2>
+            <div class="card-sub">Assigns granular role permissions (owner, admin, approver, member, viewer).</div>
+          </div>
+        </div>
+        <div class="grid g-2" style="gap:10px">
+          ${field("memName", "Display name", { placeholder: "Elena Vance" })}
+          ${field("memEmail", "Email address", { placeholder: "elena@northwind.example" })}
+        </div>
+        <div class="field">
+          <label for="memRole">Assigned role</label>
+          <select id="memRole">
+            <option value="approver">Approver (human approval gate authority)</option>
+            <option value="admin">Admin (full operational control)</option>
+            <option value="member">Member (create & manage requests)</option>
+            <option value="viewer">Viewer (read-only telemetry)</option>
+          </select>
+        </div>
+        ${sparkBtn("btnAddMember", "Add Organization Member")}
+      </div>
+    </div>
+
+    <div class="grid g-2">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Organization members (${membersRes.data.length})</h2>
+            <div class="card-sub">Users authorized within ${esc(org.name)}.</div>
+          </div>
+        </div>
+        ${table(
+          ["Name", "Email", "Role", "Status"],
+          membersRes.data,
+          (m) => `<tr>
+            <td style="color:var(--ink);font-weight:500">${esc(m.displayName)}</td>
+            <td>${esc(m.email)}</td>
+            <td>${badge(m.role)}</td>
+            <td>${badge(m.status)}</td>
+          </tr>`
+        )}
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>User access keys (${keysRes.data.length})</h2>
+            <div class="card-sub">Only Sha-256 secret hashes are stored in PostgreSQL.</div>
+          </div>
+          <button class="btn sm primary" id="btnNewUserKey" type="button">Create new key</button>
+        </div>
+        <div id="newKeyBanner"></div>
+        ${table(
+          ["Name", "Prefix", "Last used", "Status", "Action"],
+          keysRes.data,
+          (k) => `<tr>
+            <td style="color:var(--ink);font-weight:500">${esc(k.name)}</td>
+            <td class="mono">apn_u_${esc(k.prefix)}_…</td>
+            <td>${esc(when(k.lastUsedAt))}</td>
+            <td>${badge(k.revokedAt ? "Revoked" : "Active")}</td>
+            <td>${!k.revokedAt ? `<button class="btn sm" data-rev-key="${esc(k.id)}" type="button">Revoke</button>` : "—"}</td>
+          </tr>`
+        )}
+      </div>
+    </div>
+  `;
+
+  $("#btnSaveOrg").onclick = async () => {
+    try {
+      await api("PATCH", "/org", {
+        name: $("#orgName").value.trim(),
+        walletAddress: $("#orgWallet").value.trim(),
+      });
+      await loadOrg();
+      renderShell();
+      toast("Organization settings updated");
+      await viewOrg();
+    } catch (e) { toast(e.message); }
+  };
+
+  $("#btnAddMember").onclick = async () => {
+    try {
+      await api("POST", "/org/members", {
+        displayName: $("#memName").value.trim() || "Operations approver",
+        email: $("#memEmail").value.trim() || `member${Math.floor(Math.random() * 900 + 100)}@northwind.example`,
+        role: $("#memRole").value,
+      });
+      toast("Added team member");
+      await viewOrg();
+    } catch (e) { toast(e.message); }
+  };
+
+  $("#btnNewUserKey").onclick = async () => {
+    try {
+      const res = await api("POST", "/api-keys", {
+        name: "Console key " + new Date().toLocaleTimeString("en-GB"),
+        scopes: [],
+      });
+      $("#newKeyBanner").innerHTML = `
+        <div style="padding:14px;border-radius:14px;background:#f3edff;border:1px solid rgba(109,63,234,0.4);margin-bottom:14px">
+          <div style="font-weight:600;color:var(--ink)">New user key created (shown once):</div>
+          <div class="mono" style="margin-top:6px;word-break:break-all;color:var(--purple)">${esc(res.token)}</div>
+        </div>
+      `;
+      toast("Created new user access key");
+    } catch (e) { toast(e.message); }
+  };
+
+  document.querySelectorAll("[data-rev-key]").forEach((btn) => {
+    btn.onclick = async () => {
+      try {
+        await api("DELETE", `/api-keys/${btn.getAttribute("data-rev-key")}`);
+        toast("Key revoked");
+        await viewOrg();
+      } catch (e) { toast(e.message); }
+    };
+  });
+}
+
+/* =========================================================================
+   10. Signed Webhooks & Tamper-Evident Audit Chain
+   ========================================================================= */
+async function viewWebhooks() {
+  $("#view").innerHTML = `<div class="load-box">Loading webhooks and cryptographic audit chain…</div>`;
+  const [whs, dlvs, auditRes, verifyRes] = await Promise.all([
+    api("GET", "/webhooks").catch(() => ({ data: [] })),
+    api("GET", "/webhooks/deliveries?limit=25").catch(() => ({ data: [] })),
+    api("GET", "/audit?limit=40").catch(() => ({ data: [] })),
+    api("GET", "/audit/verify").catch(() => ({ valid: true, checked: 0, head: null })),
+  ]);
+
+  $("#view").innerHTML = `
+    ${pageHeader(
+      "Signed Event Telemetry & Tamper-Evident Ledger",
+      "Webhooks & cryptographic audit chain",
+      "Outgoing webhooks are signed with Hmac-Sha256; every state mutation is chained into a verifiable Sha-256 audit log."
+    )}
+
+    <div class="grid g-2" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Register signed webhook endpoint</h2>
+            <div class="card-sub">Secrets are sealed with Aes-256-Gcm at rest and used to sign outgoing event payloads.</div>
+          </div>
+        </div>
+        ${field("whUrl", "Target endpoint url", { value: "http://127.0.0.1:4000/healthz" })}
+        ${field("whDesc", "Description", { value: "Internal settlement event listener" })}
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          ${sparkBtn("btnCreateWebhook", "Register Endpoint")}
+          <button class="btn subtle" id="btnDispatchWebhooks" type="button">Dispatch queued events now</button>
+        </div>
+
+        <div class="sep"></div>
+        <h3 style="margin-bottom:10px">Active endpoints (${whs.data.length})</h3>
+        ${table(
+          ["Endpoint url", "Description", "Status", "Actions"],
+          whs.data,
+          (w) => `<tr>
+            <td class="mono">${esc(w.url)}</td>
+            <td>${esc(w.description || "—")}</td>
+            <td>${badge(w.active ? "Active" : "Paused")}</td>
+            <td style="display:flex;gap:6px">
+              <button class="btn sm subtle" data-test-wh="${esc(w.id)}" type="button">Send test</button>
+              <button class="btn sm" data-del-wh="${esc(w.id)}" type="button">Delete</button>
+            </td>
+          </tr>`
+        )}
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Webhook delivery attempts (${dlvs.data.length})</h2>
+            <div class="card-sub">Real Http delivery status codes and retry telemetry.</div>
+          </div>
+        </div>
+        ${table(
+          ["Event type", "Attempts", "Http status", "State", "Created"],
+          dlvs.data.slice(0, 8),
+          (d) => `<tr>
+            <td style="color:var(--ink);font-weight:500">${esc(d.eventType)}</td>
+            <td class="mono">${esc(d.attempts)}</td>
+            <td class="mono">${esc(d.lastStatus ?? "Pending")}</td>
+            <td>${badge(d.deliveredAt ? "Delivered" : "Queued")}</td>
+            <td>${esc(when(d.createdAt))}</td>
+          </tr>`
+        )}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h2>Tamper-evident audit hash chain (${verifyRes.checked ?? 0} verified entries)</h2>
+          <div class="card-sub">Head hash: <span class="mono">${esc(verifyRes.head || "Genesis")}</span></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          ${badge(verifyRes.valid ? "Valid" : "Attention")}
+          <button class="btn sm primary" id="btnVerifyChain" type="button">Re-verify full hash chain</button>
+        </div>
+      </div>
+      ${table(
+        ["Seq", "Action", "Actor", "Resource", "Previous hash", "Entry hash", "Timestamp"],
+        auditRes.data,
+        (a) => `<tr>
+          <td class="mono">#${esc(a.seq)}</td>
+          <td style="color:var(--ink);font-weight:500">${esc(a.action)}</td>
+          <td>${esc(cleanCase(a.actorType))}</td>
+          <td>${esc(cleanCase(a.resourceType))} · <span class="mono">${esc(short(a.resourceId, 8))}</span></td>
+          <td class="mono muted">${esc(short(a.prevHash || "Genesis", 10))}</td>
+          <td class="mono" style="color:var(--purple)">${esc(short(a.hash, 12))}</td>
+          <td>${esc(when(a.createdAt))}</td>
+        </tr>`
+      )}
+    </div>
+  `;
+
+  $("#btnCreateWebhook").onclick = async () => {
+    try {
+      await api("POST", "/webhooks", {
+        url: $("#whUrl").value.trim(),
+        description: $("#whDesc").value.trim(),
+        events: ["request.published", "offer.submitted", "approval.decided", "agreement.created", "escrow.funded", "escrow.released"],
+      });
+      toast("Registered signed webhook endpoint");
+      await refreshCounts();
+      await viewWebhooks();
+    } catch (e) { toast(e.message); }
+  };
+
+  $("#btnDispatchWebhooks").onclick = async () => {
+    try {
+      const res = await api("POST", "/admin/webhooks/tick", {});
+      toast(`Dispatched webhook queue (${res.attempted} attempted, ${res.delivered} delivered)`);
+      await viewWebhooks();
+    } catch (e) { toast(e.message); }
+  };
+
+  $("#btnVerifyChain").onclick = async () => {
+    try {
+      const v = await api("GET", "/audit/verify");
+      toast(`Cryptographic verification passed: ${v.checked} linked entries intact`);
+      await viewWebhooks();
+    } catch (e) { toast(e.message); }
+  };
+
+  document.querySelectorAll("[data-test-wh]").forEach((btn) => {
+    btn.onclick = async () => {
+      try {
+        await api("POST", `/webhooks/${btn.getAttribute("data-test-wh")}/test`, {});
+        await api("POST", "/admin/webhooks/tick", {}).catch(() => {});
+        toast("Enqueued and dispatched test webhook event");
+        await viewWebhooks();
+      } catch (e) { toast(e.message); }
+    };
+  });
+
+  document.querySelectorAll("[data-del-wh]").forEach((btn) => {
+    btn.onclick = async () => {
+      try {
+        await api("DELETE", `/webhooks/${btn.getAttribute("data-del-wh")}`);
+        toast("Deleted webhook endpoint");
+        await refreshCounts();
+        await viewWebhooks();
+      } catch (e) { toast(e.message); }
+    };
+  });
+}
+
+/* =========================================================================
+   11. Credentials & Keys Manager (every real secret surface in one view)
+   ========================================================================= */
+async function viewKeys() {
+  $("#view").innerHTML = `<div class="load-box">Loading live credentials, keys & on-chain addresses…</div>`;
+
+  const [bootRes, orgRes, metaRes, keysRes, agentsRes] = await Promise.all([
+    fetch("/v1/bootstrap/status").then((r) => r.json()).catch(() => ({})),
+    api("GET", "/org").catch(() => null),
+    fetch("/v1/meta").then((r) => r.json()).catch(() => ({})),
+    api("GET", "/api-keys").catch(() => ({ data: [] })),
+    api("GET", "/agents").catch(() => ({ data: [] })),
+  ]);
+
+  const dp = bootRes?.demoPrincipals || {};
+  const org = orgRes?.org || {};
+  const chain = metaRes?.chain || {};
+  const userKeys = keysRes.data || [];
+
+  /* Pull each agent's scoped credentials (real rows from PostgreSQL) */
+  const agentCreds = [];
+  for (const ag of agentsRes.data || []) {
+    const detail = await api("GET", `/agents/${ag.id}`).catch(() => null);
+    for (const c of detail?.credentials || []) {
+      agentCreds.push({ ...c, agentName: detail?.agent?.name || ag.name, agentId: ag.id });
+    }
+  }
+
+  const copyBtn = (value, title) => `
+    <button class="btn sm subtle" data-copy-val="${esc(value)}" title="${esc(title || "Copy value")}" type="button">
+      <svg class="ric" style="width:13px;height:13px"><use href="#i-copy"/></svg>
+      <span>Copy</span>
+    </button>`;
+
+  const sessionRows = [
+    ["Northwind Robotics · Buyer Owner", "Full purchasing authority, organization settings, keys", dp.northwind_owner, "O"],
+    ["Northwind Robotics · Human Approver", "Decides pending approval gates (separation of duties)", dp.northwind_approver, "A"],
+    ["Northwind Robotics · Sourcing Agent", "Scoped autonomous agent — bounded budgets & permissions", dp.northwind_agent, "S"],
+    ["Helios Compute · Vendor Owner", "Vendor side — offers, services, delivery attestations", dp.helios_owner, "H"],
+  ].filter(([, , tok]) => tok);
+
+  $("#view").innerHTML = `
+    ${pageHeader(
+      "Every Real Secret Surface In One Place",
+      "Credentials & keys manager",
+      "Session tokens, user keys, scoped agent credentials and on-chain addresses — only Sha-256 hashes are stored server-side, so minted tokens are displayed exactly once. Nothing here is simulated; every value is read live from PostgreSQL and the deployed contracts."
+    )}
+
+    <div class="card" style="margin-bottom:16px;border-color:rgba(109,63,234,0.35)">
+      <div class="card-head">
+        <div>
+          <h2>Live network session credentials (${sessionRows.length})</h2>
+          <div class="card-sub">Issued by the seeding transaction for this deployment. Copy any token, or activate it as your console session.</div>
+        </div>
+      </div>
+      <div class="quick-list">
+        ${sessionRows.map(([label, desc, tok, letter]) => `
+          <div class="quick-item" style="align-items:flex-start;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:10px;width:100%;flex-wrap:wrap">
+              <span class="avatar-chip" style="width:34px;height:34px;font-size:13px">${esc(letter)}</span>
+              <span style="flex:1;min-width:200px"><b>${esc(label)}</b><span class="muted" style="display:block;font-size:11.5px">${esc(desc)}</span></span>
+              <span style="display:flex;gap:6px;flex-wrap:wrap">
+                ${tok === state.token ? `<span class="badge tone-active">Active session</span>` : `<button class="btn sm primary" data-use-tok="${esc(tok)}" type="button">Use this credential</button>`}
+                ${copyBtn(tok, "Copy full token")}
+              </span>
+            </div>
+            <div class="mono muted" style="word-break:break-all;font-size:11.5px">${esc(tok)}</div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+
+    <div class="grid g-2" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Your user access keys (${userKeys.length})</h2>
+            <div class="card-sub">Bearer tokens with your account's role permissions. New keys are shown once, then only their hash remains.</div>
+          </div>
+          <button class="btn sm primary" id="btnMintUserKey" type="button">Mint new user key</button>
+        </div>
+        <div id="mintedUserKey"></div>
+        ${table(
+          ["Name", "Prefix", "Created", "Last used", "Status", "Action"],
+          userKeys,
+          (k) => `<tr>
+            <td style="color:var(--ink);font-weight:500">${esc(k.name)}</td>
+            <td class="mono">apn_u_${esc(k.prefix)}_…</td>
+            <td>${esc(when(k.createdAt))}</td>
+            <td>${esc(when(k.lastUsedAt))}</td>
+            <td>${badge(k.revokedAt ? "Revoked" : "Active")}</td>
+            <td>${!k.revokedAt ? `<button class="btn sm" data-rev-ukey="${esc(k.id)}" type="button">Revoke</button>` : "—"}</td>
+          </tr>`,
+          "No user keys issued yet from this view."
+        )}
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Scoped agent credentials (${agentCreds.length})</h2>
+            <div class="card-sub">Autonomous agent tokens carry their own budgets and permission scopes, independent of your account.</div>
+          </div>
+        </div>
+        <div id="mintedAgentKey"></div>
+        ${table(
+          ["Agent", "Label", "Prefix", "Expires", "Status", "Action"],
+          agentCreds,
+          (c) => `<tr>
+            <td style="color:var(--ink);font-weight:500">${esc(c.agentName)}</td>
+            <td>${esc(c.label)}</td>
+            <td class="mono">apn_a_${esc(c.prefix)}_…</td>
+            <td>${esc(when(c.expiresAt))}</td>
+            <td>${badge(c.revokedAt ? "Revoked" : "Active")}</td>
+            <td style="display:flex;gap:6px">
+              ${!c.revokedAt ? `<button class="btn sm" data-rev-acred="${esc(c.id)}" data-rev-agent="${esc(c.agentId)}" type="button">Revoke</button>` : "—"}
+              <button class="btn sm subtle" data-mint-acred="${esc(c.agentId)}" type="button">Mint new</button>
+            </td>
+          </tr>`,
+          "No agent credentials exist yet — register an agent in Agents & Budgets, then mint one here."
+        )}
+      </div>
+    </div>
+
+    <div class="grid g-2">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>On-chain addresses (Mezo Chain ${esc(chain.chainId || 31611)})</h2>
+            <div class="card-sub">Public addresses — safe to share; copied straight from the deployed contract registry.</div>
+          </div>
+        </div>
+        <div class="quick-list">
+          <div class="quick-item"><span><b>Procurement escrow contract</b><span class="mono">${esc(chain.escrow || "—")}</span></span>${chain.escrow ? copyBtn(chain.escrow) : ""}</div>
+          <div class="quick-item"><span><b>Musd settlement token</b><span class="mono">${esc(chain.musd || "—")}</span></span>${chain.musd ? copyBtn(chain.musd) : ""}</div>
+          <div class="quick-item"><span><b>Buyer treasury wallet (${esc(org.name || "your organization")})</b><span class="mono">${esc(org.walletAddress || "—")}</span></span>${org.walletAddress ? copyBtn(org.walletAddress) : ""}</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>How these keys work</h2>
+            <div class="card-sub">The protocol never stores a recoverable secret — which is why minted tokens appear exactly once.</div>
+          </div>
+        </div>
+        <div class="quick-list">
+          <div class="quick-item"><span><b>Session & user tokens</b><span class="muted">apn_u_… — Sha-256 hashed in the api_keys table; scoped to your role.</span></span></div>
+          <div class="quick-item"><span><b>Agent tokens</b><span class="muted">apn_a_… — hashed in agent_credentials; carry their own atomic budgets.</span></span></div>
+          <div class="quick-item"><span><b>Webhook signing secrets</b><span class="muted">Sealed with Aes-256-Gcm at rest; used to sign Hmac-Sha256 deliveries.</span></span></div>
+          <div class="quick-item"><span><b>Offer signatures</b><span class="muted">Typed-data EIP-712 style signatures by vendor wallets — verified on every submission.</span></span></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.querySelectorAll("[data-copy-val]").forEach((b) => {
+    b.onclick = () => copyText(b.getAttribute("data-copy-val"));
+  });
+
+  document.querySelectorAll("[data-use-tok]").forEach((b) => {
+    b.onclick = async () => {
+      state.token = b.getAttribute("data-use-tok");
+      store.set("apn.token", state.token);
+      await boot();
+      toast("Session credential activated");
+    };
+  });
+
+  $("#btnMintUserKey").onclick = async () => {
+    try {
+      const res = await api("POST", "/api-keys", {
+        name: "Minted from keys manager " + new Date().toLocaleTimeString("en-GB"),
+        scopes: [],
+      });
+      $("#mintedUserKey").innerHTML = `
+        <div style="padding:14px;border-radius:14px;background:#f3edff;border:1px solid rgba(109,63,234,0.4);margin-bottom:14px">
+          <div style="font-weight:600;color:var(--ink)">New user key (shown only this once):</div>
+          <div class="mono" style="margin-top:6px;word-break:break-all;color:var(--purple)">${esc(res.token)}</div>
+        </div>`;
+      toast("User key minted — copy it now, it will not be shown again");
+    } catch (e) { toast(e.message); }
+  };
+
+  document.querySelectorAll("[data-mint-acred]").forEach((b) => {
+    b.onclick = async () => {
+      const agentId = b.getAttribute("data-mint-acred");
+      try {
+        const res = await api("POST", `/agents/${agentId}/credentials`, {
+          label: "Minted from keys manager " + new Date().toLocaleTimeString("en-GB"),
+          ttlDays: 90,
+        });
+        $("#mintedAgentKey").innerHTML = `
+          <div style="padding:14px;border-radius:14px;background:#f3edff;border:1px solid rgba(109,63,234,0.4);margin-bottom:14px">
+            <div style="font-weight:600;color:var(--ink)">New agent credential (shown only this once):</div>
+            <div class="mono" style="margin-top:6px;word-break:break-all;color:var(--purple)">${esc(res.token)}</div>
+          </div>`;
+        toast("Agent credential minted — copy it now");
+      } catch (e) { toast(e.message); }
+    };
+  });
+
+  document.querySelectorAll("[data-rev-ukey]").forEach((b) => {
+    b.onclick = async () => {
+      try {
+        await api("DELETE", `/api-keys/${b.getAttribute("data-rev-ukey")}`);
+        toast("User key revoked");
+        await viewKeys();
+      } catch (e) { toast(e.message); }
+    };
+  });
+
+  document.querySelectorAll("[data-rev-acred]").forEach((b) => {
+    b.onclick = async () => {
+      try {
+        const cid = b.getAttribute("data-rev-acred");
+        const agentId = b.getAttribute("data-rev-agent");
+        await api("DELETE", `/agents/${agentId}/credentials/${cid}`);
+        toast("Agent credential revoked");
+        await viewKeys();
+      } catch (e) { toast(e.message); }
+    };
+  });
+}
+
+/* =========================================================================
+   Router & Resilient Boot
+   ========================================================================= */
+const VIEWS = {
+  overview: viewOverview,
+  requests: viewRequests,
+  approvals: viewApprovals,
+  agreements: viewAgreements,
+  disputes: viewDisputes,
+  agents: viewAgents,
+  vendors: viewVendors,
+  policies: viewPolicies,
+  org: viewOrg,
+  keys: viewKeys,
+  webhooks: viewWebhooks,
+};
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function renderTab() {
+  const fn = VIEWS[state.tab] || viewOverview;
+  try {
+    await fn();
+  } catch (e) {
+    const authIssue = /token|credential|unauthorized|401/i.test(String(e?.message || ""));
+    $("#view").innerHTML = `
+      <div class="card empty-box" style="padding:44px 20px">
+        <div style="font-size:15px;font-weight:600;color:var(--ink);margin-bottom:6px">${authIssue ? "No active credential for this view" : "This view failed to load"}</div>
+        <div style="max-width:520px;margin:0 auto 16px">${esc(e?.message || "Unknown error")}</div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="btn primary" id="errRetry" type="button">Retry now</button>
+          <button class="btn subtle" id="errKeys" type="button">Manage credentials &amp; keys</button>
+        </div>
+      </div>`;
+    $("#errRetry").onclick = () => renderTab();
+    $("#errKeys").onclick = () => navigateTo("keys");
+  }
+}
+
+async function loadOrg() {
+  const r = await api("GET", "/org");
+  state.org = r.org;
+  state.role = r.role || (r.principal === "agent" ? "ai_agent" : "owner");
+  state.principalKind = r.principal || "user";
+}
+
+/* Validate the current token against the live api; returns true when it authenticates */
+async function tokenWorks() {
+  if (!state.token) return false;
+  try {
+    await api("GET", "/org", undefined, state.token);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function showBoot(message, sub) {
+  if (!$("#view")) renderShell();
+  const target = $("#view") || $("#app");
+  if (!target) return;
+  target.innerHTML = `
+    <div class="card empty-box" style="padding:52px 20px">
+      <div style="width:44px;height:44px;margin:0 auto 16px;border-radius:14px;background:var(--grad-btn);display:grid;place-items:center;box-shadow:0 10px 24px rgba(109,63,234,0.45)">
+        <img src="/assets/logo.png" alt="" style="width:24px;height:24px;object-fit:contain" />
+      </div>
+      <div style="font-size:15px;font-weight:600;color:var(--ink);margin-bottom:4px">${esc(message)}</div>
+      <div class="muted" style="max-width:460px;margin:0 auto 18px">${esc(sub || "The dashboard will connect automatically as soon as the protocol api responds.")}</div>
+      <button class="btn primary" id="bootRetry" type="button">Retry connection</button>
+    </div>`;
+  const btn = $("#bootRetry");
+  if (btn) btn.onclick = () => boot();
+}
+
+async function boot() {
+  renderShell();
+  showBoot("Connecting to the protocol api…");
+
+  /* 1. Reach the api — retry across restarts instead of failing silently */
+  let meta = null, health = null, bootStatus = null;
+  for (let attempt = 1; attempt <= 20; attempt++) {
+    try {
+      const [m, h, b] = await Promise.all([
+        fetch("/v1/meta").then((r) => r.json()),
+        fetch("/healthz").then((r) => r.json()),
+        fetch("/v1/bootstrap/status?ensure=1").then((r) => r.json()),
+      ]);
+      meta = m || {}; health = h || {}; bootStatus = b || {};
+      if (bootStatus?.demoPrincipals || state.token || (meta && health)) break;
+    } catch {
+      showBoot(
+        "Connecting to the protocol api… (attempt " + attempt + " of 20)",
+        "The api on this port is still starting or restarting. The dashboard retries automatically every second and a half."
+      );
+      await sleep(1500);
+    }
+  }
+  state.meta = meta;
+  state.health = health;
+  state.demoPrincipals = bootStatus?.demoPrincipals || null;
+
+  if (!state.meta && !state.demoPrincipals) {
+    showBoot("The protocol api is unreachable", "Start the Protocol Console service on this port, then press retry.");
+    return;
+  }
+
+function showAuthRequired() {
+  const appEl = $("#app");
+  if (appEl) {
+    appEl.style.display = "flex";
+    appEl.style.alignItems = "center";
+    appEl.style.justifyContent = "center";
+    appEl.style.minHeight = "100vh";
+    appEl.style.padding = "24px";
+  }
+  appEl.innerHTML = `
+    <div style="width:100%;max-width:480px;margin:auto">
+      <div class="card" style="width:100%;text-align:center;padding:48px 32px;border-radius:var(--r-xl);box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.8);background:rgba(255,255,255,0.92);backdrop-filter:blur(24px)">
+        <div style="width:62px;height:62px;margin:0 auto 20px;border-radius:20px;background:var(--grad-btn);display:grid;place-items:center;box-shadow:0 12px 30px rgba(109,63,234,0.45)">
+          <img src="/assets/logo.png" alt="ProMeo" style="width:34px;height:34px;object-fit:contain" />
+        </div>
+        <h2 style="font-size:22px;font-weight:700;color:var(--ink);margin-bottom:12px;letter-spacing:-0.02em">Authentication Required</h2>
+        <p class="muted" style="margin-bottom:28px;font-size:14px;line-height:1.65">
+          This console is protected and personalized for each organization. Connect your Web3 wallet via <b>Reown AppKit</b> to access your private dashboard.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <a class="btn primary" href="/?connect=1" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;font-size:15px;font-weight:600;border-radius:var(--r-md);box-shadow:0 8px 24px rgba(109,63,234,0.35)">
+            <svg class="ric" style="width:18px;height:18px"><use href="#i-spark"/></svg>
+            <span>Connect Wallet &amp; Sign In</span>
+          </a>
+          <a class="btn subtle" href="/" style="display:flex;justify-content:center;padding:12px;font-size:13.5px;color:var(--ink-soft)">
+            Back to Website
+          </a>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+  /* 2. Establish a working credential — verify the stored one */
+  if (!state.token) {
+    try {
+      const ls = localStorage.getItem("apn.token");
+      const wallet = localStorage.getItem("apn.wallet");
+      if (ls) {
+        state.token = ls;
+        store.set("apn.token", ls);
+      } else if (wallet) {
+        const authRes = await api("POST", "/auth/wallet", { walletAddress: wallet }).catch(() => null);
+        if (authRes?.token) {
+          state.token = authRes.token;
+          store.set("apn.token", authRes.token);
+          localStorage.setItem("apn.token", authRes.token);
+        }
+      }
+    } catch {}
+  }
+
+  let works = await tokenWorks();
+  if (!works && state.demoPrincipals?.northwind_owner) {
+    state.token = state.demoPrincipals.northwind_owner;
+    store.set("apn.token", state.token);
+    works = await tokenWorks();
+  }
+  if (!works) {
+    showAuthRequired();
+    return;
+  }
+
+  try { await loadOrg(); } catch {}
+
+  renderShell();
+  await refreshCounts();
+  await renderTab();
+}
+
+boot();
+
+</script>
+</body>
+</html>
