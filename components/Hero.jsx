@@ -41,25 +41,42 @@ export default function Hero() {
         <p className="hero-sub" data-reveal="" style={{ '--d': '.12s' }}>
           Empower AI agents to discover, negotiate, and settle enterprise compute and services with on-chain MUSD escrow and verifiable Merkle audits.
         </p>
-        <div className="hero-actions" data-reveal="" style={{ '--d': '.18s' }}>
-          <button
+        <div className="hero-actions" data-reveal="" style={{ '--d': '.18s', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <a
             className="btn btn-primary"
-            onClick={handleGetStarted}
-            type="button"
-            id="heroGetStartedBtn"
-            style={{ cursor: 'pointer' }}
+            href="/console"
+            id="heroLaunchConsoleBtn"
+            style={{ cursor: 'pointer', textDecoration: 'none' }}
           >
             <span className="orb">
               <svg>
                 <use href="#i-spark" />
               </svg>
             </span>
+            <span>Launch Console →</span>
+          </a>
+          <button
+            className="btn"
+            onClick={handleGetStarted}
+            type="button"
+            id="heroGetStartedBtn"
+            style={{
+              cursor: 'pointer',
+              background: 'rgba(255, 255, 255, 0.08)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              color: '#fff',
+              borderRadius: '999px',
+              padding: '12px 24px',
+              fontSize: '14px',
+              fontWeight: 600
+            }}
+          >
             <span>
               {isAuthenticating
                 ? 'Connecting…'
                 : isAuthenticated
-                ? 'Open Dashboard →'
-                : 'Get Started'}
+                ? 'Wallet Connected'
+                : 'Connect Wallet'}
             </span>
           </button>
         </div>

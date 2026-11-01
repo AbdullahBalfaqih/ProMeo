@@ -102,7 +102,6 @@ export function registerAgreementRoutes(app: FastifyInstance, db: Database, conf
   });
 
   app.post("/v1/agreements/:id/execute/:action", async (req) => {
-    const p = requirePermission(req.principal, "agreement:read");
     const { id, action } = parse(
       z.object({
         id: Uuid,
@@ -110,6 +109,20 @@ export function registerAgreementRoutes(app: FastifyInstance, db: Database, conf
       }),
       req.params,
     );
+
+    // FIX HIGH FINDING #2: Action-Specific Permission Enforcement
+    const requiredPermission =
+      action === "release"
+        ? "agreement:release_intent"
+        : action === "cancel"
+          ? "agreement:cancel_intent"
+          : action === "fund"
+            ? "agreement:fund_intent"
+            : action === "accept" || action === "deliver"
+              ? "offer:submit"
+              : "dispute:open";
+
+    const p = requirePermission(req.principal, requiredPermission);
     const body = parse(
       z
         .object({

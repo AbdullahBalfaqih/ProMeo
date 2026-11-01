@@ -77,8 +77,34 @@ export function registerSystemRoutes(app: FastifyInstance, db: Database, config:
       indexer: config.INDEXER_ENABLED,
       webhooks: Boolean(config.SECRET_ENCRYPTION_KEY),
       disputeResolution: Boolean(config.RESOLVER_PRIVATE_KEY),
+      mezoTroveState: true,
     },
   }));
+
+  // -------------------------------------------------------------------------
+  // Mezo Protocol State Integration
+  // -------------------------------------------------------------------------
+
+  app.get("/v1/mezo/overview", async () => ({
+    network: "Mezo Testnet",
+    chainId: config.MEZO_CHAIN_ID,
+    contracts: {
+      musdToken: config.MUSD_ADDRESS ?? "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+      troveManager: "0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0",
+      borrowerOperations: "0xCdF7028ceAB81fA0C6971208e83fa7872994beE5",
+      priceFeed: "0x86bCF0841622a5dAC14A313a15f96A95421b9366",
+      escrow: config.ESCROW_CONTRACT_ADDRESS ?? null,
+    },
+    systemStatus: "healthy",
+    minimumCollateralRatio: "110%",
+    recommendedSafetyICR: "150%",
+  }));
+
+  app.get("/v1/mezo/trove/:borrower", async (req) => {
+    const { borrower } = parse(z.object({ borrower: z.string() }), req.params);
+    const { getTroveHealth } = await import("../../lib/mezo.js");
+    return getTroveHealth(borrower);
+  });
 
   // -------------------------------------------------------------------------
   // Webhooks

@@ -82,6 +82,29 @@ export default function Nav() {
             ))}
           </nav>
 
+          <a
+            className="btn"
+            href="/console"
+            id="navConsoleBtn"
+            style={{
+              cursor: 'pointer',
+              marginRight: '8px',
+              background: 'rgba(109, 63, 234, 0.15)',
+              color: '#fff',
+              border: '1px solid rgba(139, 92, 246, 0.4)',
+              borderRadius: '999px',
+              padding: '8px 16px',
+              fontSize: '13px',
+              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              textDecoration: 'none'
+            }}
+          >
+            <span>Launch Console →</span>
+          </a>
+
           <button
             className="btn nav-cta"
             onClick={handleGetStarted}

@@ -82,11 +82,16 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
     uint16 public feeBps;
 
     mapping(bytes32 => Agreement) private _agreements;
+    /// @notice Buyer to organization binding (Fix High Finding #1)
+    mapping(address => bytes32) public buyerOrg;
     /// @notice Total MUSD currently held for live agreements. Invariant target.
     uint256 public totalActiveEscrow;
     /// @notice Monotonic counter of agreements ever created, used by indexers.
     uint256 public agreementCount;
 
+    event OrgBound(address indexed buyer, bytes32 indexed orgId);
+
+    error OrgMismatch(bytes32 expected, bytes32 provided);
     error ZeroAddress();
     error InvalidAmount();
     error InvalidFee();
@@ -167,6 +172,14 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
 
         if (msg.sender != buyer && !registry.isAuthorized(p.orgId, msg.sender)) {
             revert AgentNotAuthorized(p.orgId, msg.sender);
+        }
+
+        // Fix High Finding #1: Bind each buyer address to its org
+        if (buyerOrg[buyer] == bytes32(0)) {
+            buyerOrg[buyer] = p.orgId;
+            emit OrgBound(buyer, p.orgId);
+        } else if (buyerOrg[buyer] != p.orgId) {
+            revert OrgMismatch(buyerOrg[buyer], p.orgId);
         }
 
         agreementId = keccak256(

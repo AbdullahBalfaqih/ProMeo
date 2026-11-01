@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { growthBars, partnerBars, stats } from '@/lib/data';
 import { MiniEyebrow } from '@/components/ui/Atoms';
 import { useAuth } from '@/components/Web3Provider';
@@ -9,6 +9,20 @@ export default function Stats() {
   const { handleGetStarted, isAuthenticated } = useAuth();
   const countersRef = useRef([]);
   const startedRef = useRef(false);
+  const [liveStats, setLiveStats] = useState(null);
+
+  useEffect(() => {
+    fetch('/v1/meta')
+      .then((r) => r.json())
+      .then((meta) => {
+        setLiveStats({
+          chainId: meta.chain?.chainId || 31611,
+          chainName: meta.chain?.name || 'Mezo Testnet',
+          escrow: meta.chain?.escrow,
+        });
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (startedRef.current) return;
