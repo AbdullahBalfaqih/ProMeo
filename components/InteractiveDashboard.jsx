@@ -199,13 +199,13 @@ export default function InteractiveDashboard() {
               <img
                 src="/assets/3d/glass-lock.png"
                 alt="Glass Lock"
-                style={{ width: '74px', height: '74px', objectFit: 'contain', filter: 'drop-shadow(0 10px 14px rgba(109,63,234,0.18))' }}
+                style={{ width: '96px', height: '96px', objectFit: 'contain', filter: 'drop-shadow(0 12px 20px rgba(109,63,234,0.22))' }}
               />
             </div>
             <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{
-                background: 'rgba(16, 185, 129, 0.14)',
-                color: '#059669',
+                background: 'rgba(109, 63, 234, 0.1)',
+                color: 'var(--purple)',
                 fontSize: '12px',
                 fontWeight: 700,
                 padding: '4px 10px',
@@ -247,7 +247,7 @@ export default function InteractiveDashboard() {
               <img
                 src="/assets/3d/glass-pie.png"
                 alt="Glass Pie"
-                style={{ width: '74px', height: '74px', objectFit: 'contain', filter: 'drop-shadow(0 10px 14px rgba(109,63,234,0.18))' }}
+                style={{ width: '96px', height: '96px', objectFit: 'contain', filter: 'drop-shadow(0 12px 20px rgba(109,63,234,0.22))' }}
               />
             </div>
             <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -295,13 +295,13 @@ export default function InteractiveDashboard() {
               <img
                 src="/assets/3d/glass-rocket.png"
                 alt="Glass Rocket"
-                style={{ width: '74px', height: '74px', objectFit: 'contain', filter: 'drop-shadow(0 10px 14px rgba(109,63,234,0.18))' }}
+                style={{ width: '96px', height: '96px', objectFit: 'contain', filter: 'drop-shadow(0 12px 20px rgba(109,63,234,0.22))' }}
               />
             </div>
             <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{
-                background: 'rgba(245, 158, 11, 0.14)',
-                color: '#d97706',
+                background: 'rgba(109, 63, 234, 0.1)',
+                color: 'var(--purple)',
                 fontSize: '12px',
                 fontWeight: 700,
                 padding: '4px 10px',
@@ -366,7 +366,7 @@ export default function InteractiveDashboard() {
                   <span style={{ fontSize: '34px', fontWeight: 800, color: 'var(--ink)', letterSpacing: '-0.02em' }}>
                     $68,450.00
                   </span>
-                  <span style={{ fontSize: '14px', fontWeight: 700, color: '#059669' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--purple)' }}>
                     {currentData.change} ({currentData.volume})
                   </span>
                 </div>
@@ -540,7 +540,7 @@ export default function InteractiveDashboard() {
                 <div>
                   <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBottom: '4px' }}>Simulated Allocation</div>
                   <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--ink)' }}>{stakeAmount || 0} MUSD</div>
-                  <div style={{ fontSize: '11.5px', color: '#059669', fontWeight: 600 }}>Trove ICR: 185% (Safe)</div>
+                  <div style={{ fontSize: '11.5px', color: 'var(--purple)', fontWeight: 600 }}>Trove ICR: 185% (Safe)</div>
                 </div>
               </div>
 
@@ -879,7 +879,7 @@ export default function InteractiveDashboard() {
                           width: '9px',
                           height: '9px',
                           borderRadius: '50%',
-                          background: '#10b981',
+                          background: '#6d3fea',
                           border: '2px solid #fff',
                         }} />
                       </div>
@@ -918,7 +918,7 @@ export default function InteractiveDashboard() {
                 <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   📍 Mezo Node Map
                 </span>
-                <span style={{ fontSize: '10.5px', color: '#059669', fontWeight: 700 }}>● 31611 Connected</span>
+                <span style={{ fontSize: '10.5px', color: 'var(--purple)', fontWeight: 700 }}>● 31611 Connected</span>
               </div>
 
               {/* Map Canvas with Animated Pins */}
@@ -946,8 +946,8 @@ export default function InteractiveDashboard() {
                     width: '18px',
                     height: '18px',
                     borderRadius: '50%',
-                    background: '#f97316',
-                    boxShadow: '0 0 0 4px rgba(249,115,22,0.25)',
+                    background: '#6d3fea',
+                    boxShadow: '0 0 0 4px rgba(109,63,234,0.25)',
                     color: '#fff',
                     fontSize: '10px',
                     fontWeight: 800,
