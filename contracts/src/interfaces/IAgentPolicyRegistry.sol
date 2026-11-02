@@ -24,6 +24,9 @@ interface IAgentPolicyRegistry {
     /// @notice Emitted when an org freezes / unfreezes all of its agents at once.
     event OrgFrozen(bytes32 indexed orgId, bool frozen);
 
+    /// @notice Emitted when an organization binds or updates its official buyer treasury wallet.
+    event OrgBuyerSet(bytes32 indexed orgId, address indexed buyer);
+
     error NotRegistryAdmin();
     error ZeroOrgId();
     error ZeroAgent();
@@ -37,4 +40,10 @@ interface IAgentPolicyRegistry {
         external
         view
         returns (bool authorized, uint64 validUntil, bytes32 policyHash, bool orgFrozen);
+
+    /// @notice Returns the bound buyer treasury address for an organization
+    function getOrgBuyer(bytes32 orgId) external view returns (address);
+
+    /// @notice Returns whether candidate address is the registered buyer for the organization
+    function isOrgBuyer(bytes32 orgId, address candidate) external view returns (bool);
 }

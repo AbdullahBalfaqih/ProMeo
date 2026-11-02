@@ -5,6 +5,13 @@ import { serviceOrder, services } from '@/lib/data';
 import { Eyebrow } from '@/components/ui/Atoms';
 import { useAuth } from '@/components/Web3Provider';
 
+const serviceImages = {
+  custody: { src: '/assets/3d/glass-lock.png', alt: '3D MUSD Escrow Lock' },
+  trading: { src: '/assets/3d/glass-rocket.png', alt: '3D Agent Velocity Rocket' },
+  vesting: { src: '/assets/3d/glass-pie.png', alt: '3D veBTC Collateral Pie' },
+  grant: { src: '/assets/3d/glass-shield.png', alt: '3D Merkle Shield' },
+};
+
 export default function Services() {
   const { handleGetStarted, isAuthenticated } = useAuth();
   const [activeKey, setActiveKey] = useState('custody');
@@ -87,12 +94,19 @@ export default function Services() {
               <span></span>
               <span></span>
             </div>
-            <div className="scene-core">
-              <span className="scene-ic" data-scene-icon="">
-                <svg key={active.icon}>
-                  <use href={`#${active.icon}`} />
-                </svg>
-              </span>
+            <div className="scene-core" style={{ width: '130px', height: '130px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', boxShadow: 'none' }}>
+              <img 
+                key={activeKey}
+                src={serviceImages[activeKey]?.src || '/assets/3d/glass-lock.png'} 
+                alt={serviceImages[activeKey]?.alt || '3D Feature'}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 12px 28px rgba(124, 58, 237, 0.55))',
+                  animation: 'floatSlow 4s ease-in-out infinite'
+                }}
+              />
             </div>
             <span className="scene-node n1"></span>
             <span className="scene-node n2"></span>

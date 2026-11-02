@@ -4,6 +4,7 @@ pragma solidity 0.8.28;
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {IAgentPolicyRegistry} from "./interfaces/IAgentPolicyRegistry.sol";
+import {IVeBTC} from "./interfaces/IVeBTC.sol";
 
 /// @title AgentPolicyRegistry
 /// @notice Authoritative, on-chain registry of which AI agents may move an
@@ -42,13 +43,19 @@ contract AgentPolicyRegistry is IAgentPolicyRegistry, AccessControl, Pausable {
     mapping(bytes32 => mapping(address => Authorization)) private _authorizations;
     /// @dev orgId => frozen?
     mapping(bytes32 => bool) private _orgFrozen;
+    /// @dev orgId => bound buyer treasury address
+    mapping(bytes32 => address) private _orgBuyers;
 
     /// @notice Number of currently authorized, unexpired agents per org (best-effort
     ///         counter used by dashboards; expiry may make it optimistic).
     mapping(bytes32 => uint32) public activeAgentCount;
 
+    /// @notice Mezo's veBTC contract reference (0xB63fcCd03521Cf21907627bd7fA465C129479231)
+    IVeBTC public veBtc;
+
     event RegistryAdminGranted(bytes32 indexed orgId, address indexed manager);
     event RegistryAdminRevoked(bytes32 indexed orgId, address indexed manager);
+    event VeBtcSet(address indexed veBtc);
 
     error OrgIsFrozen(bytes32 orgId);
     error ExpiryInPast(uint64 validUntil);
@@ -98,6 +105,19 @@ contract AgentPolicyRegistry is IAgentPolicyRegistry, AccessControl, Pausable {
         }
 
         emit AgentAuthorizationSet(orgId, agent, authorized, validUntil, policyHash);
+    }
+
+    /// @notice Bind or update an organization's official on-chain buyer treasury wallet.
+    ///         Callable by REGISTRY_ADMIN_ROLE or the scoped org manager.
+    function setOrgBuyer(bytes32 orgId, address buyer) external whenNotPaused {
+        if (orgId == bytes32(0)) revert ZeroOrgId();
+        if (buyer == address(0)) revert ZeroAgent();
+        if (!hasRole(REGISTRY_ADMIN_ROLE, msg.sender) && !hasRole(_orgManagerRole(orgId), msg.sender)) {
+            revert AccessControlUnauthorizedAccount(msg.sender, REGISTRY_ADMIN_ROLE);
+        }
+        if (_orgFrozen[orgId]) revert OrgIsFrozen(orgId);
+        _orgBuyers[orgId] = buyer;
+        emit OrgBuyerSet(orgId, buyer);
     }
 
     /// @notice Freeze or unfreeze every agent of an organization at once. While
@@ -162,6 +182,20 @@ contract AgentPolicyRegistry is IAgentPolicyRegistry, AccessControl, Pausable {
         _unpause();
     }
 
+    /// @notice Set Mezo veBTC contract address.
+    function setVeBtc(address veBtc_) external onlyRole(REGISTRY_ADMIN_ROLE) {
+        veBtc = IVeBTC(veBtc_);
+        emit VeBtcSet(veBtc_);
+    }
+
+    /// @notice Returns true if the organization's bound buyer wallet holds veBTC locked on Mezo.
+    function hasOrgVeBtcBoost(bytes32 orgId) external view returns (bool) {
+        if (address(veBtc) == address(0)) return false;
+        address buyer = _orgBuyers[orgId];
+        if (buyer == address(0)) return false;
+        return veBtc.balanceOf(buyer) > 0;
+    }
+
     // ---------------------------------------------------------------------
     // Reads
     // ---------------------------------------------------------------------
@@ -185,6 +219,18 @@ contract AgentPolicyRegistry is IAgentPolicyRegistry, AccessControl, Pausable {
 
     function orgFrozen(bytes32 orgId) external view returns (bool) {
         return _orgFrozen[orgId];
+    }
+
+    /// @notice Returns the bound buyer treasury address for an organization
+    function getOrgBuyer(bytes32 orgId) external view returns (address) {
+        return _orgBuyers[orgId];
+    }
+
+    /// @notice Returns whether candidate address is the registered buyer for the organization
+    function isOrgBuyer(bytes32 orgId, address candidate) public view returns (bool) {
+        if (paused() || _orgFrozen[orgId]) return false;
+        address bound = _orgBuyers[orgId];
+        return bound != address(0) && bound == candidate;
     }
 
     /// @notice Role identifier for an org-scoped manager.

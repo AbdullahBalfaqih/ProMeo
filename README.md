@@ -99,16 +99,18 @@ sequenceDiagram
 
 ### 1. Smart Contract Subsystem (contracts/)
 Built with Solidity 0.8.28 and tested with the Foundry framework:
-- ProcurementEscrow.sol: Non-custodial MUSD escrow supporting milestone-based releases, EIP-2612 permit gasless approvals, multi-party dispute resolution, emergency pause mechanisms, and protocol fee caps.
-- AgentPolicyRegistry.sol: On-chain registry defining active agent identities, allowed spending categories, transaction ceilings, and authorized signatories.
-- MockMUSD.sol: Fully compliant ERC-20 stablecoin test double used in local and automated CI test harnesses.
+- **ProcurementEscrow.sol**: Non-custodial MUSD escrow supporting both full lump-sum and progressive **milestone-based releases** (`releaseMilestone`), gasless **EIP-2612 permit** approvals (`createAgreementWithPermit`), on-chain **buyer-to-org tenant binding** (`orgBuyer`), **Mezo Trove health checks** (`IMezoTroveManager`), multi-party dispute resolution, emergency pause mechanisms, and protocol fee caps.
+- **AgentPolicyRegistry.sol**: Authoritative on-chain registry defining active agent identities, allowed spending categories, transaction ceilings, organization-bound treasury wallets (`setOrgBuyer`), and authorized signatories.
+- **IMezoTrove.sol**: Native protocol interface to inspect borrower Troves on Mezo, reading collateral amounts, debt balances, and Individual Collateral Ratios (ICR).
+- **MockMUSD.sol**: Fully compliant ERC-20 and EIP-2612 stablecoin test double used in local and automated CI test harnesses.
 
 ### 2. High-Performance Control Plane (server/)
 Engineered using Fastify 5, TypeScript, and Drizzle ORM over PostgreSQL:
-- Atomic Budget Reservations: Concurrency-safe reservations utilizing pessimistic row-level locking (`SELECT ... FOR UPDATE`) preventing double-spend anomalies across concurrent agent tasks.
-- Deterministic Policy Engine: Evaluates dynamic incoming requests against organization-defined rules with `allow`, `deny`, and `require_human_approval` actions, enforcing strict deny-overrides semantics.
-- Cryptographic Audit Trail: Append-only event store featuring SHA-256 hash chaining to ensure mathematical immutability and complete audit reproducibility.
-- Event Indexer: Real-time blockchain watcher capturing on-chain escrow funding, dispute triggers, and milestone payouts to synchronize off-chain state.
+- **Action-Specific RBAC Enforcement**: Fixed high-severity authorization findings by enforcing granular permissions on all execute actions (`agreement:fund_intent`, `agreement:release_intent`, `agreement:cancel_intent`, `dispute:open`, and `vendor:manage`).
+- **Atomic Budget Reservations**: Concurrency-safe reservations utilizing pessimistic row-level locking (`SELECT ... FOR UPDATE`) preventing double-spend anomalies across concurrent agent tasks.
+- **Deterministic Policy Engine**: Evaluates dynamic incoming requests against organization-defined rules with `allow`, `deny`, and `require_human_approval` actions, enforcing strict deny-overrides semantics.
+- **Cryptographic Audit Trail**: Append-only event store featuring SHA-256 hash chaining to ensure mathematical immutability and complete audit reproducibility.
+- **Event Indexer**: Real-time blockchain watcher capturing on-chain escrow funding, dispute triggers, and milestone payouts to synchronize off-chain state.
 
 ### 3. Developer SDK (packages/sdk/)
 TypeScript SDK (`@apn/sdk`) providing:
@@ -117,11 +119,84 @@ TypeScript SDK (`@apn/sdk`) providing:
 - Canonical JSON serialization and Keccak-256 digest calculation matching on-chain contracts.
 - HMAC-SHA256 webhook signature validation.
 
-### 4. Interactive Web Application (app/, components/)
-Production-ready Next.js 15 (App Router) user interface:
-- Web3 Wallet Connectivity: Multi-wallet integration powered by Reown AppKit and Wagmi with native support for the Mezo Testnet.
-- Animated Visual Identity: Hardware-accelerated GSAP continuous ticker, dynamic crypto asset displays, and custom-tailored dark mode aesthetics.
-- Real-Time Protocol Metrics: Live monitoring of active escrow balances, settlement volumes, and audit event counts.
+### 4. Interactive Web Application & Live Console (app/, components/, public/console/)
+Production-ready Next.js 15 (App Router) user interface and live operator console:
+- **Direct Live Console Access**: Seamless navigation to `/console` serving the complete procurement workspace directly from the repository code.
+- **Web3 Wallet Connectivity**: Multi-wallet integration powered by Reown AppKit and Wagmi with native support for the Mezo Testnet (Chain ID `31611`).
+- **End-to-End User Flow**: Normal user wallets can connect, create RFQ proposals, approve MUSD, fund escrow agreements, and trigger on-chain milestone releases.
+- **Official Pitch Deck**: Complete executive presentation and architectural overview available in [`docs/DECK.md`](docs/DECK.md).
+
+---
+
+## Security Audit & High Findings Resolution
+
+Following external review, ProMeo has resolved both High-severity findings:
+
+| Finding | Impact | Technical Resolution |
+|---|---|---|
+| **1. Unbound Buyer Address in `createAgreement`** | High | In `ProcurementEscrow.sol`, each organization is strictly bound to its verified buyer treasury wallet (`orgBuyer[orgId]`). Any attempt by unauthorized callers or cross-tenant agents to specify an arbitrary victim's address as buyer reverts immediately with `BuyerNotBoundToOrg`. |
+| **2. Broad Read Scope on `/execute` Route** | High | In `server/src/routes/agreements.ts`, the `/v1/agreements/:id/execute/:action` endpoint now enforces action-specific permissions. `fund` requires `agreement:fund_intent`, `release` requires `agreement:release_intent`, `cancel` requires `agreement:cancel_intent`, `dispute` requires `dispute:open`, and vendor actions require `vendor:manage`. Viewers cannot execute financial transactions. |
+
+---
+
+## Deep Mezo Protocol Integration (Beyond Plain ERC-20)
+
+ProMeo goes beyond generic ERC-20 token interactions by coupling escrow operations directly with the Mezo economic layer:
+
+1. **Mezo Trove State Verification**:
+   - `ProcurementEscrow.sol` integrates `IMezoTroveManager` to inspect the buyer's Trove on Mezo before locking or releasing high-value escrow agreements.
+   - The contract verifies that the borrower's Trove is active and satisfies the `minTroveHealthRatio` (Individual Collateral Ratio), protecting vendors from undercollateralized counterparty risk.
+2. **Borrower Operations Credit Lines**:
+   - Agent budgets can be funded directly from MUSD minted against Bitcoin collateral through Mezo's `BorrowerOperations` contract (`withdrawMUSD`).
+3. **EIP-2612 Gasless Permit**:
+   - Users and agents fund escrow agreements in a single transaction via `createAgreementWithPermit`, leveraging native permit signatures on canonical Mezo MUSD (`0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503`).
+4. **Milestone Settlements**:
+   - Long-running agent deliverables support progressive milestone payouts via `releaseMilestone`, with prorated protocol fee collection and remainder protection.
+
+---
+
+## Real Mezo Testnet Execution Runbook
+
+To demonstrate level 2+ on-chain integration, execute real flows through the deployed escrow contract on Mezo Testnet:
+
+### 1. Get Testnet Assets
+1. Obtain testnet BTC from the faucet: `https://faucet.test.mezo.org`
+2. Open a Trove and borrow canonical MUSD: `https://testnet.mezo.org` (or receive testnet MUSD).
+3. Canonical MUSD Token Address on Mezo Testnet: `0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503`.
+
+### 2. Run Escrow Cycle from User Wallet
+```bash
+# Set environment
+export RPC_URL="https://rpc.test.mezo.org"
+export ESCROW="0x88EDbF3E966Ba23F0262771CBCF6d217718BD048"
+export MUSD="0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503"
+export BUYER_PK="<YOUR_PRIVATE_KEY>"
+
+# 1. Approve MUSD to Escrow
+cast send $MUSD "approve(address,uint256)" $ESCROW 100000000000000000000 \
+  --rpc-url $RPC_URL --private-key $BUYER_PK
+
+# 2. Create and Fund Escrow Agreement
+# (or execute directly from the ProMeo Console at /console)
+
+# 3. Release Funds to Vendor
+cast send $ESCROW "release(bytes32)" <AGREEMENT_ID> \
+  --rpc-url $RPC_URL --private-key $BUYER_PK
+```
+
+### 3. Verify Contracts on Blockscout
+```bash
+cd contracts
+forge verify-contract 0x88EDbF3E966Ba23F0262771CBCF6d217718BD048 src/ProcurementEscrow.sol:ProcurementEscrow \
+  --chain-id 31611 \
+  --verifier blockscout \
+  --verifier-url "https://explorer.test.mezo.org/api"
+
+forge verify-contract 0x957dbD62B6aF0C13C94D07814B06323d53198ccC src/AgentPolicyRegistry.sol:AgentPolicyRegistry \
+  --chain-id 31611 \
+  --verifier blockscout \
+  --verifier-url "https://explorer.test.mezo.org/api"
+```
 
 ---
 

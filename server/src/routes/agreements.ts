@@ -9,6 +9,7 @@ import { formatMusd } from "../lib/money.js";
 import { notFound, preconditionFailed } from "../lib/errors.js";
 import { parse, parseLimit, principalOf, sendIdempotent, withIdempotency } from "../lib/http.js";
 import { requirePermission } from "../auth/service.js";
+import type { Permission } from "../auth/rbac.js";
 import {
   buildActionIntent,
   confirmTransaction,
@@ -101,8 +102,16 @@ export function registerAgreementRoutes(app: FastifyInstance, db: Database, conf
     return confirmTransaction(db, config, p, id, body.txHash as Hex);
   });
 
+  const ACTION_PERMISSIONS: Record<string, Permission> = {
+    fund: "agreement:fund_intent",
+    release: "agreement:release_intent",
+    cancel: "agreement:cancel_intent",
+    dispute: "dispute:open",
+    accept: "vendor:manage",
+    deliver: "vendor:manage",
+  };
+
   app.post("/v1/agreements/:id/execute/:action", async (req) => {
-    const p = requirePermission(req.principal, "agreement:read");
     const { id, action } = parse(
       z.object({
         id: Uuid,
@@ -110,6 +119,8 @@ export function registerAgreementRoutes(app: FastifyInstance, db: Database, conf
       }),
       req.params,
     );
+    const requiredPermission = ACTION_PERMISSIONS[action] ?? "agreement:fund_intent";
+    const p = requirePermission(req.principal, requiredPermission);
     const body = parse(
       z
         .object({

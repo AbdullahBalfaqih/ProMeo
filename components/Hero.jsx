@@ -41,7 +41,7 @@ export default function Hero() {
         <p className="hero-sub" data-reveal="" style={{ '--d': '.12s' }}>
           Empower AI agents to discover, negotiate, and settle enterprise compute and services with on-chain MUSD escrow and verifiable Merkle audits.
         </p>
-        <div className="hero-actions" data-reveal="" style={{ '--d': '.18s' }}>
+        <div className="hero-actions" data-reveal="" style={{ '--d': '.18s', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
           <button
             className="btn btn-primary"
             onClick={handleGetStarted}
@@ -59,9 +59,32 @@ export default function Hero() {
                 ? 'Connecting…'
                 : isAuthenticated
                 ? 'Open Dashboard →'
-                : 'Get Started'}
+                : 'Connect & Enter'}
             </span>
           </button>
+
+          <a
+            className="btn btn-secondary"
+            href="/console"
+            id="heroConsoleBtn"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '12px 24px',
+              fontSize: '15px',
+              fontWeight: 600,
+              borderRadius: '99px',
+              background: 'rgba(255, 255, 255, 0.85)',
+              color: 'var(--ink)',
+              border: '1px solid rgba(84, 58, 170, 0.2)',
+              textDecoration: 'none',
+              backdropFilter: 'blur(10px)',
+              cursor: 'pointer',
+            }}
+          >
+            <span>Launch Live Console →</span>
+          </a>
         </div>
       </div>
 

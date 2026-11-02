@@ -244,6 +244,11 @@ export async function GET(req, { params }) {
         escrow: ESCROW_ADDRESS,
         registry: REGISTRY_ADDRESS,
         musd: MUSD_ADDRESS,
+        btc: '0x7b7C000000000000000000000000000000000000',
+        priceFeed: '0x86bCF0841622a5dAC14A313a15f96A95421b9366',
+        veBTC: '0xB63fcCd03521Cf21907627bd7fA465C129479231',
+        poolsVoter: '0x72F8dd7F44fFa19E45955aa20A5486E8EB255738',
+        feeDistributor: '0x10B0E7b3411F4A38ca2F6BB697aA28D607924729',
       },
       currency: { symbol: 'MUSD', decimals: 18 },
       webhooks: {
@@ -464,11 +469,18 @@ export async function POST(req, { params }) {
     const agrId = segments[1];
     const item = state.agreements.find((a) => a.id === agrId);
     if (item) {
+      if (action === 'fund') item.state = 'funded';
+      if (action === 'accept') item.state = 'accepted';
+      if (action === 'deliver') item.state = 'delivered';
       if (action === 'release') item.state = 'released';
-      if (action === 'refund') item.state = 'refunded';
+      if (action === 'refund' || action === 'cancel') item.state = 'cancelled';
       if (action === 'dispute') item.state = 'disputed';
     }
-    return json({ ok: true, state: item?.state || action });
+    return json({
+      ok: true,
+      state: item?.state || action,
+      txHash: `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`,
+    });
   }
 
   if (fullPath === 'agreements') {
