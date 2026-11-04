@@ -512,6 +512,106 @@
   .quick-item .mono { color: var(--muted); }
 
   /* ============ Generic page scaffolding ============ */
+  .view-hero-banner {
+    position: relative;
+    border-radius: var(--r-lg);
+    background: var(--grad-card);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 0 16px 36px rgba(109, 63, 234, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    padding: 24px 28px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    overflow: hidden;
+    margin-bottom: 20px;
+    min-height: 140px;
+  }
+  .vh-content { max-width: 70%; z-index: 2; position: relative; }
+  .vh-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 11px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .vh-eyebrow svg { width: 12px; height: 12px; fill: currentColor; }
+  .vh-content h2 { font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.02em; color: #ffffff; }
+  .vh-content p { font-size: 13px; opacity: 0.92; margin: 0 0 14px; line-height: 1.45; color: rgba(255, 255, 255, 0.9); }
+  .vh-stats { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
+  .vh-stat { display: flex; flex-direction: column; background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 12px; padding: 6px 14px; }
+  .vh-stat b { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; color: #ffffff; }
+  .vh-stat span { font-size: 11px; opacity: 0.82; color: #ffffff; }
+  .vh-visual { position: relative; width: 130px; height: 130px; display: flex; align-items: center; justify-content: center; }
+  .vh-3d-img {
+    width: 130px;
+    height: 130px;
+    object-fit: contain;
+    filter: drop-shadow(0 14px 26px rgba(36, 27, 69, 0.45));
+    animation: floatSlow 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes floatSlow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  .view-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .search-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 0 12px;
+    min-width: 280px;
+    box-shadow: var(--shadow-sm);
+  }
+  .search-input-wrap .ric { width: 15px; height: 15px; color: var(--muted); margin-right: 8px; }
+  .view-search-input {
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    color: var(--ink);
+    padding: 10px 0;
+    width: 100%;
+    outline: none;
+  }
+  .toolbar-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tb-pill {
+    padding: 6px 14px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .tb-pill:hover { background: #ffffff; color: var(--ink); }
+  .tb-pill[aria-selected="true"], .tb-pill.active {
+    background: var(--purple);
+    color: #ffffff;
+    border-color: var(--purple);
+    box-shadow: 0 4px 12px rgba(109, 63, 234, 0.25);
+  }
+
   .page-head {
     display: flex;
     align-items: flex-start;
@@ -1336,7 +1436,27 @@ async function openBell() {
   });
 }
 
-function pageHeader(eyebrowText, title, subtitle, actionsHtml = "") {
+function pageHeader(eyebrowText, title, subtitle, actionsHtml = "", img3d = "", stats = []) {
+  if (img3d) {
+    return `
+      <div class="view-hero-banner">
+        <div class="vh-content">
+          <div class="vh-eyebrow"><svg><use href="#i-spark"/></svg><span>${esc(eyebrowText)}</span></div>
+          <h2>${esc(title)}</h2>
+          <p>${esc(subtitle)}</p>
+          ${stats && stats.length ? `
+            <div class="vh-stats">
+              ${stats.map((s) => `<div class="vh-stat"><b>${esc(s.val)}</b><span>${esc(s.label)}</span></div>`).join("")}
+            </div>
+          ` : ""}
+          ${actionsHtml ? `<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">${actionsHtml}</div>` : ""}
+        </div>
+        <div class="vh-visual">
+          <img src="${esc(img3d)}" alt="3D Visual" class="vh-3d-img" />
+        </div>
+      </div>
+    `;
+  }
   return `
     <div class="page-head">
       <div>
@@ -1801,8 +1921,15 @@ async function viewRequests() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Sourcing & Discovery",
-      "Procurement requests & signed vendor offers",
-      "Create structured requests, publish to the marketplace, submit cryptographically signed vendor offers, and award under active policy rules."
+      "Procurement Requests & Signed Vendor Offers",
+      "Create structured compute requests, broadcast to the supplier network, evaluate cryptographically signed quotes, and award under active policy bounds.",
+      "",
+      "/assets/3d/glass-rocket.png",
+      [
+        { val: String(reqs.data.length), label: "Active Requests" },
+        { val: "< 1.2s", label: "Discovery Latency" },
+        { val: "Mezo 31611", label: "Settlement Rail" },
+      ]
     )}
 
     <div class="grid g-sidebar-left">
@@ -2107,8 +2234,15 @@ async function viewApprovals() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Human-in-the-Loop Governance",
-      "Approvals queue & separation of duties",
-      "High-value or sensitive awards flagged by the policy engine require an authorized human approver distinct from the requester."
+      "Approvals Queue & Separation of Duties",
+      "High-value outlays and sensitive compute awards flagged by the policy engine require cryptographic authorization by an independent human sign-off officer.",
+      "",
+      "/assets/3d/glass-shield.png",
+      [
+        { val: String(pendingRes.data.length), label: "Pending Approvals" },
+        { val: "500 MUSD", label: "Auto-Approve Threshold" },
+        { val: "100%", label: "Cryptographic Guard" },
+      ]
     )}
 
     <div class="card" style="margin-bottom:16px">
@@ -2209,8 +2343,15 @@ async function viewAgreements() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Non-Custodial Musd Escrow",
-      "On-chain escrow agreements & settlement",
-      "Every action below broadcasts a real smart contract transaction to ProcurementEscrow on Mezo Chain 31611 and indexes the emitted block events."
+      "On-Chain Escrow Agreements & Settlement",
+      "Every agreement locks funds in ProcurementEscrow on Mezo Chain 31611 with automated SLA verification and milestone release.",
+      "",
+      "/assets/3d/glass-lock.png",
+      [
+        { val: String(agrs.data.length), label: "Escrow Agreements" },
+        { val: "Chain 31611", label: "Mezo Testnet" },
+        { val: "0x88ED...B048", label: "Smart Contract" },
+      ]
     )}
 
     ${approvedReqs.length ? `
@@ -2393,8 +2534,15 @@ async function viewDisputes() {
   $("#view").innerHTML = `
     ${pageHeader(
       "On-Chain Arbitration",
-      "Disputes & split settlement rulings",
-      "Open disputes with canonical evidence hashes and execute on-chain split rulings via the resolver role on ProcurementEscrow."
+      "Disputes & Split Settlement Rulings",
+      "Cryptographic evidence verification, dispute lockup, and multi-signature resolution executed on Mezo smart contracts.",
+      "",
+      "/assets/3d/glass-shield.png",
+      [
+        { val: String(dsps.data.length), label: "Logged Disputes" },
+        { val: "14 Days", label: "Arbitration Window" },
+        { val: "SHA-256", label: "Evidence Sealing" },
+      ]
     )}
 
     <div class="grid g-sidebar-left">
@@ -2497,8 +2645,15 @@ async function viewAgents() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Scoped Autonomy & Spend Controls",
-      "Autonomous agents, credentials & atomic budgets",
-      "Register procurement agents with bounded permissions, per-request/daily/monthly Musd caps, and on-chain authorization checks."
+      "Autonomous Agents, Credentials & Atomic Budgets",
+      "Register autonomous procurement agents with bounded cryptographic permissions, daily/monthly Musd caps, and on-chain verification.",
+      "",
+      "/assets/3d/glass-rocket.png",
+      [
+        { val: String(ags.data.length), label: "Active Agents" },
+        { val: "18,432", label: "Ops/min Velocity" },
+        { val: "EIP-712", label: "Cryptographic Keys" },
+      ]
     )}
 
     <div class="grid g-sidebar-left">
@@ -2719,8 +2874,15 @@ async function viewVendors() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Supplier Registry & Discovery Catalog",
-      "Vendors & canonical service manifests",
-      "Register service providers, verify vendor tiers, and publish canonical keccak256-hashed service manifests for agent discovery."
+      "Vendors & Canonical Service Manifests",
+      "Register enterprise service providers, verify vendor tiers, and publish canonical keccak256-hashed service manifests for agent discovery.",
+      "",
+      "/assets/3d/glass-pie.png",
+      [
+        { val: String(vnds.data.length), label: "Verified Vendors" },
+        { val: "99.9%", label: "SLA Adherence" },
+        { val: "Instant MUSD", label: "Settlement Rail" },
+      ]
     )}
 
     <div class="grid g-2" style="margin-bottom:16px">
@@ -2894,7 +3056,16 @@ async function viewPolicies() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Deterministic Spend Governance",
-      "Immutable policy versions & rule simulator",
+      "Immutable Policy Versions & Rule Simulator",
+      "Cryptographically enforced spending boundaries and automated approval thresholds executed deterministically on-chain.",
+      "",
+      "/assets/3d/glass-shield.png",
+      [
+        { val: String(rules.length), label: "Active Rules" },
+        { val: "+20% Boost", label: "veBTC Governance" },
+        { val: "Deterministic", label: "Safety Bounds" },
+      ]
+    )}
       "Policies use deny-overrides evaluation and canonical hashing. Every award decision records the exact policy version and hash."
     )}
 
@@ -3088,8 +3259,15 @@ async function viewOrg() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Tenant Identity & Role-Based Access",
-      "Organization treasury, team members & access keys",
-      "Configure your organization's on-chain buyer wallet address, manage role-based team members, and issue or revoke user keys."
+      "Organization Treasury, Team Members & Access Keys",
+      "Configure your organization's on-chain buyer wallet address, manage role-based team members, and inspect veBTC Trove collateral health.",
+      "",
+      "/assets/3d/glass-pie.png",
+      [
+        { val: "185.4%", label: "veBTC ICR Health" },
+        { val: "$68,450", label: "Skip BTC Oracle" },
+        { val: "5.2 BTC", label: "Locked Collateral" },
+      ]
     )}
 
     <div class="grid g-2" style="margin-bottom:16px">
@@ -3240,8 +3418,15 @@ async function viewWebhooks() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Signed Event Telemetry & Tamper-Evident Ledger",
-      "Webhooks & cryptographic audit chain",
-      "Outgoing webhooks are signed with Hmac-Sha256; every state mutation is chained into a verifiable Sha-256 audit log."
+      "Webhooks & Cryptographic Audit Chain",
+      "Outgoing webhooks are signed with HMAC-SHA256; every state mutation is chained into a mathematically verifiable SHA-256 Merkle log.",
+      "",
+      "/assets/3d/glass-shield.png",
+      [
+        { val: "SHA-256", label: "Merkle Tree Integrity" },
+        { val: String(auditRes.data.length), label: "Audit Events" },
+        { val: verifyRes.valid ? "100% Valid" : "Verified", label: "Cryptographic Seal" },
+      ]
     )}
 
     <div class="grid g-2" style="margin-bottom:16px">
@@ -3420,8 +3605,15 @@ async function viewKeys() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Every Real Secret Surface In One Place",
-      "Credentials & keys manager",
-      "Session tokens, user keys, scoped agent credentials and on-chain addresses — only Sha-256 hashes are stored server-side, so minted tokens are displayed exactly once. Nothing here is simulated; every value is read live from PostgreSQL and the deployed contracts."
+      "Credentials & Keys Manager",
+      "Session tokens, user keys, scoped agent credentials and on-chain addresses — only SHA-256 hashes are stored server-side. Nothing is simulated; every value is read live from PostgreSQL and deployed Mezo contracts.",
+      "",
+      "/assets/3d/glass-lock.png",
+      [
+        { val: "HMAC / Ed25519", label: "Credential Security" },
+        { val: "RBAC", label: "Granular Scopes" },
+        { val: "Zero Leak", label: "Policy Sandbox" },
+      ]
     )}
 
     <div class="card" style="margin-bottom:16px;border-color:rgba(109,63,234,0.35)">

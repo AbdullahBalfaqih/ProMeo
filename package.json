@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@gsap/react": "^2.1.2",
     "@metamask/connect-evm": "^2.1.1",
     "@reown/appkit": "^1.8.24",
