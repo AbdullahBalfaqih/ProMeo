@@ -42,43 +42,72 @@ export default function Hero() {
           Empower AI agents to discover, negotiate, and settle enterprise compute and services with on-chain MUSD escrow and verifiable Merkle audits.
         </p>
         <div className="hero-actions" data-reveal="" style={{ '--d': '.18s', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <a
+          <button
             className="btn btn-primary"
-            href="/console"
-            id="heroLaunchConsoleBtn"
-            style={{ cursor: 'pointer', textDecoration: 'none' }}
+            onClick={handleGetStarted}
+            type="button"
+            id="heroGetStartedBtn"
+            style={{ cursor: 'pointer' }}
           >
             <span className="orb">
               <svg>
                 <use href="#i-spark" />
               </svg>
             </span>
-            <span>Launch Console →</span>
-          </a>
-          <button
-            className="btn"
-            onClick={handleGetStarted}
-            type="button"
-            id="heroGetStartedBtn"
-            style={{
-              cursor: 'pointer',
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              color: '#fff',
-              borderRadius: '999px',
-              padding: '12px 24px',
-              fontSize: '14px',
-              fontWeight: 600
-            }}
-          >
             <span>
               {isAuthenticating
                 ? 'Connecting…'
                 : isAuthenticated
-                ? 'Wallet Connected'
-                : 'Connect Wallet'}
+                ? 'Open Dashboard →'
+                : 'Connect & Enter'}
             </span>
           </button>
+
+          <a
+            className="btn btn-secondary"
+            href="/console"
+            id="heroConsoleBtn"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '12px 24px',
+              fontSize: '15px',
+              fontWeight: 600,
+              borderRadius: '99px',
+              background: 'rgba(255, 255, 255, 0.85)',
+              color: 'var(--ink)',
+              border: '1px solid rgba(84, 58, 170, 0.2)',
+              textDecoration: 'none',
+              backdropFilter: 'blur(10px)',
+              cursor: 'pointer',
+            }}
+          >
+            <span>Launch Live Console →</span>
+          </a>
+
+          <a
+            className="btn btn-secondary"
+            href="/demo"
+            id="heroDemoBtn"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '12px 24px',
+              fontSize: '15px',
+              fontWeight: 600,
+              borderRadius: '99px',
+              background: 'rgba(109, 63, 234, 0.15)',
+              color: 'var(--purple)',
+              border: '1px solid rgba(109, 63, 234, 0.35)',
+              textDecoration: 'none',
+              backdropFilter: 'blur(10px)',
+              cursor: 'pointer',
+            }}
+          >
+            <span>Watch MacBook Demo (1080p) ▶</span>
+          </a>
         </div>
       </div>
 

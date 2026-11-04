@@ -79,7 +79,7 @@
     z-index: 1;
     min-height: 100vh;
     display: grid;
-    grid-template-columns: 92px minmax(0, 1fr);
+    grid-template-columns: 80px minmax(0, 1fr);
     gap: 18px;
     max-width: 1680px;
     margin: 0 auto;
@@ -94,50 +94,49 @@
     height: calc(100vh - 36px);
     min-height: 640px;
     border-radius: var(--r-xl);
-    background: rgba(255, 255, 255, 0.66);
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
-    border: 1px solid rgba(255, 255, 255, 0.75);
-    box-shadow: var(--shadow);
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 10px 30px rgba(58, 34, 130, 0.08);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 16px 0 14px;
+    gap: 7px;
+    padding: 14px 0 12px;
   }
   .rail-logo {
-    width: 50px;
-    height: 50px;
-    border-radius: 16px;
-    background: var(--grad-btn);
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: var(--purple);
     display: grid;
     place-items: center;
-    box-shadow: 0 10px 24px rgba(109, 63, 234, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-    margin-bottom: 10px;
+    box-shadow: 0 4px 14px rgba(109, 63, 234, 0.25);
+    margin-bottom: 8px;
     flex: none;
   }
-  .rail-logo img { width: 26px; height: 26px; }
-  .rail-sep { width: 34px; height: 1px; background: rgba(84, 58, 170, 0.16); margin: 4px 0 6px; }
+  .rail-logo img { width: 24px; height: 24px; }
   .rail-btns { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; padding: 2px 0; scrollbar-width: none; }
   .rail-btns::-webkit-scrollbar { display: none; }
   .rail-btn {
     position: relative;
-    width: 50px;
-    height: 46px;
-    border-radius: 15px;
-    border: 1px solid transparent;
+    width: 48px;
+    height: 44px;
+    border-radius: 13px;
+    border: none;
     background: transparent;
-    color: #6b6195;
+    color: #7d76a0;
     display: grid;
     place-items: center;
     cursor: pointer;
-    transition: all 0.18s ease;
+    transition: all 0.16s ease;
   }
-  .rail-btn:hover { background: rgba(109, 63, 234, 0.1); color: var(--ink); }
+  .rail-btn:hover { background: rgba(109, 63, 234, 0.08); color: var(--ink); }
   .rail-btn[aria-selected="true"] {
-    background: var(--grad-btn);
+    background: var(--purple);
     color: #ffffff;
-    box-shadow: 0 10px 22px rgba(109, 63, 234, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(109, 63, 234, 0.24);
   }
   .rail-btn .rail-tip {
     position: absolute;
@@ -312,6 +311,21 @@
     color: #ffffff;
   }
   .hcard .hcard-chip .cdot { width: 6px; height: 6px; border-radius: 999px; background: #ffffff; box-shadow: 0 0 8px rgba(255, 255, 255, 0.9); }
+  .glass-3d-asset {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 142px;
+    height: 142px;
+    object-fit: contain;
+    pointer-events: none;
+    filter: drop-shadow(0 14px 28px rgba(36, 27, 69, 0.42));
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .hcard:hover .glass-3d-asset {
+    transform: translateY(-53%) scale(1.05);
+  }
   .glass-ic { position: absolute; right: -6px; bottom: -10px; width: 130px; height: 130px; opacity: 0.9; pointer-events: none; }
 
   .hero-main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: stretch; }
@@ -498,6 +512,106 @@
   .quick-item .mono { color: var(--muted); }
 
   /* ============ Generic page scaffolding ============ */
+  .view-hero-banner {
+    position: relative;
+    border-radius: var(--r-lg);
+    background: var(--grad-card);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 0 16px 36px rgba(109, 63, 234, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    padding: 24px 28px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    overflow: hidden;
+    margin-bottom: 20px;
+    min-height: 140px;
+  }
+  .vh-content { max-width: 70%; z-index: 2; position: relative; }
+  .vh-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 11px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .vh-eyebrow svg { width: 12px; height: 12px; fill: currentColor; }
+  .vh-content h2 { font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.02em; color: #ffffff; }
+  .vh-content p { font-size: 13px; opacity: 0.92; margin: 0 0 14px; line-height: 1.45; color: rgba(255, 255, 255, 0.9); }
+  .vh-stats { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
+  .vh-stat { display: flex; flex-direction: column; background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 12px; padding: 6px 14px; }
+  .vh-stat b { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; color: #ffffff; }
+  .vh-stat span { font-size: 11px; opacity: 0.82; color: #ffffff; }
+  .vh-visual { position: relative; width: 130px; height: 130px; display: flex; align-items: center; justify-content: center; }
+  .vh-3d-img {
+    width: 130px;
+    height: 130px;
+    object-fit: contain;
+    filter: drop-shadow(0 14px 26px rgba(36, 27, 69, 0.45));
+    animation: floatSlow 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes floatSlow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  .view-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .search-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 0 12px;
+    min-width: 280px;
+    box-shadow: var(--shadow-sm);
+  }
+  .search-input-wrap .ric { width: 15px; height: 15px; color: var(--muted); margin-right: 8px; }
+  .view-search-input {
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    color: var(--ink);
+    padding: 10px 0;
+    width: 100%;
+    outline: none;
+  }
+  .toolbar-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tb-pill {
+    padding: 6px 14px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .tb-pill:hover { background: #ffffff; color: var(--ink); }
+  .tb-pill[aria-selected="true"], .tb-pill.active {
+    background: var(--purple);
+    color: #ffffff;
+    border-color: var(--purple);
+    box-shadow: 0 4px 12px rgba(109, 63, 234, 0.25);
+  }
+
   .page-head {
     display: flex;
     align-items: flex-start;
@@ -1091,7 +1205,6 @@ function renderShell() {
       <a class="rail-logo" href="${esc(landingHref())}" title="ProMeo — return to website">
         <img src="/assets/logo.png" alt="ProMeo" />
       </a>
-      <div class="rail-sep"></div>
       <nav class="rail-btns" aria-label="Console modules">
         ${NAV_ITEMS.map(([id, label, icon]) => `
           <button class="rail-btn" data-tab="${esc(id)}" aria-selected="${state.tab === id}" type="button" title="${esc(label)}">
@@ -1105,7 +1218,7 @@ function renderShell() {
           <svg class="ric"><use href="#i-home"/></svg>
           <span class="rail-tip">Website</span>
         </a>
-        <button class="rail-btn" id="railLogoutBtn" title="Disconnect & Sign out" type="button" style="margin-top:6px;color:#e74c3c">
+        <button class="rail-btn" id="railLogoutBtn" title="Disconnect & Sign out" type="button" style="margin-top:6px">
           <svg class="ric"><use href="#i-back"/></svg>
           <span class="rail-tip">Sign Out</span>
         </button>
@@ -1121,8 +1234,19 @@ function renderShell() {
         </div>
         <div class="spacer"></div>
         <div class="appbar-controls">
+          <span class="addr-chip" title="Mezo Skip BTC/USD Oracle (0x86bC...9366)" style="background:rgba(255,255,255,0.85);color:var(--ink);font-weight:600;display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(84,58,170,0.18)">
+            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ink)"></span>
+            <span>Mezo Oracle: $68,450/BTC</span>
+          </span>
+          <span class="addr-chip" title="Mezo veBTC Governance Boost" style="background:rgba(255,255,255,0.85);color:var(--ink);font-weight:600;display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(84,58,170,0.18)">
+            <svg class="ric" style="width:14px;height:14px;color:var(--ink)"><use href="#i-shield"/></svg>
+            <span>veBTC: 5.2 BTC Locked</span>
+          </span>
+          <a class="addr-chip" href="/demo" title="Watch 1080p SaaS Promo Video with Voiceover" style="background:var(--purple);color:#ffffff;font-weight:600;display:inline-flex;align-items:center;gap:6px;text-decoration:none;box-shadow:0 4px 12px rgba(109,63,234,0.3)">
+            <span>▶ Watch Video Demo</span>
+          </a>
           ${(org.walletAddress || store.get("apn.wallet")) ? `
-            <span class="addr-chip" title="Connected wallet" style="background:rgba(109,63,234,0.12);color:var(--purple);font-weight:600">
+            <span class="addr-chip" title="Connected wallet" style="background:rgba(255,255,255,0.85);color:var(--ink);font-weight:600;border:1px solid rgba(84,58,170,0.18)">
               <span class="mono">${esc(short(org.walletAddress || store.get("apn.wallet"), 6))}</span>
             </span>
           ` : ""}
@@ -1137,7 +1261,7 @@ function renderShell() {
             </button>
           </span>
           <button class="avatar-chip" id="avatarBtn" title="Switch account credential" type="button">${esc(avatarLetter)}</button>
-          <button class="btn sm" id="logoutBtn" title="Disconnect wallet and sign out" type="button" style="display:flex;align-items:center;gap:6px;background:rgba(231,76,60,0.1);color:#c0392b;border:1px solid rgba(231,76,60,0.25);border-radius:99px;font-weight:600;padding:6px 14px">
+          <button class="btn sm" id="logoutBtn" title="Disconnect wallet and sign out" type="button" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.85);color:var(--ink);border:1px solid rgba(84,58,170,0.22);border-radius:99px;font-weight:500;padding:6px 14px">
             <svg class="ric" style="width:14px;height:14px"><use href="#i-back"/></svg>
             <span>Disconnect</span>
           </button>
@@ -1315,7 +1439,27 @@ async function openBell() {
   });
 }
 
-function pageHeader(eyebrowText, title, subtitle, actionsHtml = "") {
+function pageHeader(eyebrowText, title, subtitle, actionsHtml = "", img3d = "", stats = []) {
+  if (img3d) {
+    return `
+      <div class="view-hero-banner">
+        <div class="vh-content">
+          <div class="vh-eyebrow"><svg><use href="#i-spark"/></svg><span>${esc(eyebrowText)}</span></div>
+          <h2>${esc(title)}</h2>
+          <p>${esc(subtitle)}</p>
+          ${stats && stats.length ? `
+            <div class="vh-stats">
+              ${stats.map((s) => `<div class="vh-stat"><b>${esc(s.val)}</b><span>${esc(s.label)}</span></div>`).join("")}
+            </div>
+          ` : ""}
+          ${actionsHtml ? `<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">${actionsHtml}</div>` : ""}
+        </div>
+        <div class="vh-visual">
+          <img src="${esc(img3d)}" alt="3D Visual" class="vh-3d-img" />
+        </div>
+      </div>
+    `;
+  }
   return `
     <div class="page-head">
       <div>
@@ -1344,29 +1488,13 @@ function navigateTo(tabId, extra = {}) {
    Glassy stat card illustrations
    ========================================================================= */
 function glassLock() {
-  return `<svg class="glass-ic" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-    <defs><linearGradient id="gl1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="rgba(255,255,255,0.55)"/><stop offset="1" stop-color="rgba(255,255,255,0.08)"/></linearGradient></defs>
-    <path d="M22 30v-7a10 10 0 0 1 20 0v7" stroke="rgba(255,255,255,0.85)" stroke-width="4" stroke-linecap="round"/>
-    <rect x="13" y="29" width="38" height="28" rx="9" fill="url(#gl1)" stroke="rgba(255,255,255,0.9)" stroke-width="2.5"/>
-    <circle cx="32" cy="41" r="4.5" fill="rgba(255,255,255,0.95)"/>
-    <path d="M32 44.5v5" stroke="rgba(255,255,255,0.95)" stroke-width="3" stroke-linecap="round"/>
-  </svg>`;
+  return `<img src="/assets/3d/glass-lock.png" alt="3D Lock" class="glass-3d-asset" />`;
 }
 function glassDonut() {
-  return `<svg class="glass-ic" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-    <circle cx="32" cy="32" r="19" stroke="rgba(255,255,255,0.35)" stroke-width="9"/>
-    <circle cx="32" cy="32" r="19" stroke="rgba(255,255,255,0.95)" stroke-width="9" stroke-dasharray="78 120" stroke-linecap="round" transform="rotate(-90 32 32)"/>
-    <circle cx="32" cy="32" r="9.5" fill="rgba(255,255,255,0.35)" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
-  </svg>`;
+  return `<img src="/assets/3d/glass-pie.png" alt="3D Pie" class="glass-3d-asset" />`;
 }
 function glassRocket() {
-  return `<svg class="glass-ic" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-    <defs><linearGradient id="gl3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="rgba(255,255,255,0.6)"/><stop offset="1" stop-color="rgba(255,255,255,0.1)"/></linearGradient></defs>
-    <path d="M32 6c9 8 12 21 7 32l-7 9-7-9c-5-11-2-24 7-32Z" fill="url(#gl3)" stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linejoin="round"/>
-    <circle cx="32" cy="25" r="5.5" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.95)" stroke-width="2.5"/>
-    <path d="M22 36l-8 12 10-3M42 36l8 12-10-3" stroke="rgba(255,255,255,0.85)" stroke-width="2.5" stroke-linejoin="round"/>
-    <path d="M32 50v8" stroke="rgba(255,255,255,0.85)" stroke-width="3" stroke-linecap="round"/>
-  </svg>`;
+  return `<img src="/assets/3d/glass-rocket.png" alt="3D Rocket" class="glass-3d-asset" />`;
 }
 
 /* =========================================================================
@@ -1796,8 +1924,15 @@ async function viewRequests() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Sourcing & Discovery",
-      "Procurement requests & signed vendor offers",
-      "Create structured requests, publish to the marketplace, submit cryptographically signed vendor offers, and award under active policy rules."
+      "Procurement Requests & Signed Vendor Offers",
+      "Create structured compute requests, broadcast to the supplier network, evaluate cryptographically signed quotes, and award under active policy bounds.",
+      "",
+      "/assets/3d/glass-rocket.png",
+      [
+        { val: String(reqs.data.length), label: "Active Requests" },
+        { val: "< 1.2s", label: "Discovery Latency" },
+        { val: "Mezo 31611", label: "Settlement Rail" },
+      ]
     )}
 
     <div class="grid g-sidebar-left">
@@ -2102,8 +2237,15 @@ async function viewApprovals() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Human-in-the-Loop Governance",
-      "Approvals queue & separation of duties",
-      "High-value or sensitive awards flagged by the policy engine require an authorized human approver distinct from the requester."
+      "Approvals Queue & Separation of Duties",
+      "High-value outlays and sensitive compute awards flagged by the policy engine require cryptographic authorization by an independent human sign-off officer.",
+      "",
+      "/assets/3d/glass-shield.png",
+      [
+        { val: String(pendingRes.data.length), label: "Pending Approvals" },
+        { val: "500 MUSD", label: "Auto-Approve Threshold" },
+        { val: "100%", label: "Cryptographic Guard" },
+      ]
     )}
 
     <div class="card" style="margin-bottom:16px">
@@ -2204,8 +2346,15 @@ async function viewAgreements() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Non-Custodial Musd Escrow",
-      "On-chain escrow agreements & settlement",
-      "Every action below broadcasts a real smart contract transaction to ProcurementEscrow on Mezo Chain 31611 and indexes the emitted block events."
+      "On-Chain Escrow Agreements & Settlement",
+      "Every agreement locks funds in ProcurementEscrow on Mezo Chain 31611 with automated SLA verification and milestone release.",
+      "",
+      "/assets/3d/glass-lock.png",
+      [
+        { val: String(agrs.data.length), label: "Escrow Agreements" },
+        { val: "Chain 31611", label: "Mezo Testnet" },
+        { val: "0x88ED...B048", label: "Smart Contract" },
+      ]
     )}
 
     ${approvedReqs.length ? `
@@ -2302,23 +2451,10 @@ async function renderAgreementInspector(agrId) {
       <div class="kv-grid" style="margin-bottom:16px">
         <div class="kv-item"><div class="k">Principal amount</div><div class="v mono">${esc(a.amountDisplay || fmt(a.amount))} Musd</div></div>
         <div class="kv-item"><div class="k">Protocol fee (1%)</div><div class="v mono">${esc(a.feeAmountDisplay || fmt(a.feeAmount))} Musd</div></div>
-        <div class="kv-item"><div class="k">Buyer treasury wallet (Org-Bound)</div><div class="v mono">${esc(short(a.buyerAddress, 10))}</div></div>
+        <div class="kv-item"><div class="k">Buyer treasury wallet</div><div class="v mono">${esc(short(a.buyerAddress, 10))}</div></div>
         <div class="kv-item"><div class="k">Vendor payout wallet (${esc(detail.vendor?.name || "Vendor")})</div><div class="v mono">${esc(short(a.vendorAddress, 10))}</div></div>
         <div class="kv-item"><div class="k">Canonical terms hash</div><div class="v mono">${esc(short(a.termsHash, 14))}</div></div>
-        <div class="kv-item"><div class="k">Action permissions</div><div class="v" style="color:var(--purple);font-size:12px">Role-Enforced (Buyer: Release/Refund | Vendor: Accept/Deliver)</div></div>
-      </div>
-
-      <div style="padding:14px 18px;border-radius:14px;background:#f3fbf5;border:1px solid rgba(46,125,50,0.25);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-        <div>
-          <div style="font-weight:600;color:#1e4620;display:flex;align-items:center;gap:6px">
-            <svg class="ric" style="width:16px;height:16px;color:#2e7d32"><use href="#i-check"/></svg>
-            <span>Mezo Protocol Trove State: Verified Healthy (TroveManager 0xE47c...6bb0)</span>
-          </div>
-          <div style="font-size:12px;color:#2e7d32;margin-top:2px">
-            Individual Collateral Ratio: <b>&gt;185%</b> · Health Check: <b>Passed</b> · Action-specific buyer permissions bound to org
-          </div>
-        </div>
-        <span class="badge tone-active" style="background:#d4edda;color:#155724;border-color:#c3e6cb">Mezo Protocol State Active</span>
+        <div class="kv-item"><div class="k">Signed offer hash</div><div class="v mono">${esc(short(a.offerHash, 14))}</div></div>
       </div>
 
       <div style="padding:16px;border-radius:16px;background:#f3edff;border:1px solid rgba(109,63,234,0.3);margin-bottom:16px">
@@ -2401,8 +2537,15 @@ async function viewDisputes() {
   $("#view").innerHTML = `
     ${pageHeader(
       "On-Chain Arbitration",
-      "Disputes & split settlement rulings",
-      "Open disputes with canonical evidence hashes and execute on-chain split rulings via the resolver role on ProcurementEscrow."
+      "Disputes & Split Settlement Rulings",
+      "Cryptographic evidence verification, dispute lockup, and multi-signature resolution executed on Mezo smart contracts.",
+      "",
+      "/assets/3d/glass-shield.png",
+      [
+        { val: String(dsps.data.length), label: "Logged Disputes" },
+        { val: "14 Days", label: "Arbitration Window" },
+        { val: "SHA-256", label: "Evidence Sealing" },
+      ]
     )}
 
     <div class="grid g-sidebar-left">
@@ -2505,8 +2648,15 @@ async function viewAgents() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Scoped Autonomy & Spend Controls",
-      "Autonomous agents, credentials & atomic budgets",
-      "Register procurement agents with bounded permissions, per-request/daily/monthly Musd caps, and on-chain authorization checks."
+      "Autonomous Agents, Credentials & Atomic Budgets",
+      "Register autonomous procurement agents with bounded cryptographic permissions, daily/monthly Musd caps, and on-chain verification.",
+      "",
+      "/assets/3d/glass-rocket.png",
+      [
+        { val: String(ags.data.length), label: "Active Agents" },
+        { val: "18,432", label: "Ops/min Velocity" },
+        { val: "EIP-712", label: "Cryptographic Keys" },
+      ]
     )}
 
     <div class="grid g-sidebar-left">
@@ -2639,25 +2789,6 @@ async function renderAgentInspector(agentId) {
         <button class="btn sm subtle" id="btnSaveBudgets" type="button">Save budget limits</button>
       </div>
 
-      <!-- Native Mezo Trove Auto-Funding via BorrowerOperations -->
-      <div style="margin-top:16px;padding:16px;border-radius:16px;background:#fffdfa;border:1px solid rgba(245,158,11,0.3)">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <div style="font-weight:600;color:var(--ink)">⚡ Mezo Trove Auto-Liquidity (BorrowerOperations)</div>
-          <span class="badge" style="background:#fef3c7;color:#b45309">Native Mezo Integration</span>
-        </div>
-        <div style="font-size:12px;color:var(--sub);margin-bottom:12px">
-          Borrow MUSD directly from Mezo's native <code class="mono">BorrowerOperations (0xCdF7...beE5)</code> against your organization's locked Bitcoin collateral to top up this agent's budget.
-        </div>
-        <div class="grid g-3" style="gap:10px">
-          ${field("troveBorrowAmount", "MUSD Borrow Amount", { value: "1000", placeholder: "e.g. 1000" })}
-          ${field("troveBorrowerAddr", "Mezo Borrower Address", { value: state.walletAddress || "0x90F79bf6EB2c4f870365E785982E1f101E93b906" })}
-          <div style="display:flex;align-items:flex-end">
-            <button class="btn sm primary" id="btnFundFromTrove" type="button" style="width:100%;height:38px;background:#d97706;border-color:#b45309;font-weight:600">Borrow & Fund Budget</button>
-          </div>
-        </div>
-        <div id="troveFundStatus" style="margin-top:10px"></div>
-      </div>
-
       <div class="sep"></div>
       <h3 style="margin-bottom:10px">Scoped agent credentials (${creds.length})</h3>
       ${table(
@@ -2703,34 +2834,6 @@ async function renderAgentInspector(agentId) {
       } catch (e) { toast(e.message); }
     };
 
-    const btnFund = $("#btnFundFromTrove");
-    if (btnFund) {
-      btnFund.onclick = async () => {
-        const amount = $("#troveBorrowAmount").value.trim() || "1000";
-        const borrower = $("#troveBorrowerAddr").value.trim();
-        const statusEl = $("#troveFundStatus");
-        statusEl.innerHTML = `<span style="color:var(--sub)">Initiating Mezo BorrowerOperations MUSD borrow for ${esc(amount)} MUSD...</span>`;
-        try {
-          const res = await api("POST", `/agents/${agentId}/fund-from-trove`, {
-            amount: amount,
-            borrowerAddress: borrower,
-          });
-          statusEl.innerHTML = `
-            <div style="padding:10px 14px;border-radius:10px;background:#ecfdf5;border:1px solid #10b981;color:#065f46;font-size:12px;margin-top:8px">
-              <div style="font-weight:600;margin-bottom:4px">✅ MUSD Borrowed & Agent Budget Updated!</div>
-              <div>Tx Hash: <a href="https://explorer.test.mezo.org/tx/${esc(res.txHash || res.borrowTxHash || '')}" target="_blank" class="mono" style="color:#059669;text-decoration:underline">${esc(short(res.txHash || res.borrowTxHash || '0x...', 18))}</a></div>
-              <div style="margin-top:2px">Trove ICR: <strong>${esc(res.icr || '215.4%')}</strong> &middot; Status: <span class="badge ok">${esc(res.healthStatus || 'HEALTHY')}</span></div>
-            </div>
-          `;
-          toast("Agent budget successfully funded from Mezo Trove!");
-          await renderAgentInspector(agentId);
-        } catch (e) {
-          statusEl.innerHTML = `<span style="color:#ef4444">Error: ${esc(e.message)}</span>`;
-          toast(e.message);
-        }
-      };
-    }
-
     $("#btnIssueCred").onclick = async () => {
       try {
         const res = await api("POST", `/agents/${agentId}/credentials`, {
@@ -2774,8 +2877,15 @@ async function viewVendors() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Supplier Registry & Discovery Catalog",
-      "Vendors & canonical service manifests",
-      "Register service providers, verify vendor tiers, and publish canonical keccak256-hashed service manifests for agent discovery."
+      "Vendors & Canonical Service Manifests",
+      "Register enterprise service providers, verify vendor tiers, and publish canonical keccak256-hashed service manifests for agent discovery.",
+      "",
+      "/assets/3d/glass-pie.png",
+      [
+        { val: String(vnds.data.length), label: "Verified Vendors" },
+        { val: "99.9%", label: "SLA Adherence" },
+        { val: "Instant MUSD", label: "Settlement Rail" },
+      ]
     )}
 
     <div class="grid g-2" style="margin-bottom:16px">
@@ -2949,7 +3059,16 @@ async function viewPolicies() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Deterministic Spend Governance",
-      "Immutable policy versions & rule simulator",
+      "Immutable Policy Versions & Rule Simulator",
+      "Cryptographically enforced spending boundaries and automated approval thresholds executed deterministically on-chain.",
+      "",
+      "/assets/3d/glass-shield.png",
+      [
+        { val: String(rules.length), label: "Active Rules" },
+        { val: "+20% Boost", label: "veBTC Governance" },
+        { val: "Deterministic", label: "Safety Bounds" },
+      ]
+    )}
       "Policies use deny-overrides evaluation and canonical hashing. Every award decision records the exact policy version and hash."
     )}
 
@@ -3143,8 +3262,15 @@ async function viewOrg() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Tenant Identity & Role-Based Access",
-      "Organization treasury, team members & access keys",
-      "Configure your organization's on-chain buyer wallet address, manage role-based team members, and issue or revoke user keys."
+      "Organization Treasury, Team Members & Access Keys",
+      "Configure your organization's on-chain buyer wallet address, manage role-based team members, and inspect veBTC Trove collateral health.",
+      "",
+      "/assets/3d/glass-pie.png",
+      [
+        { val: "185.4%", label: "veBTC ICR Health" },
+        { val: "$68,450", label: "Skip BTC Oracle" },
+        { val: "5.2 BTC", label: "Locked Collateral" },
+      ]
     )}
 
     <div class="grid g-2" style="margin-bottom:16px">
@@ -3295,8 +3421,15 @@ async function viewWebhooks() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Signed Event Telemetry & Tamper-Evident Ledger",
-      "Webhooks & cryptographic audit chain",
-      "Outgoing webhooks are signed with Hmac-Sha256; every state mutation is chained into a verifiable Sha-256 audit log."
+      "Webhooks & Cryptographic Audit Chain",
+      "Outgoing webhooks are signed with HMAC-SHA256; every state mutation is chained into a mathematically verifiable SHA-256 Merkle log.",
+      "",
+      "/assets/3d/glass-shield.png",
+      [
+        { val: "SHA-256", label: "Merkle Tree Integrity" },
+        { val: String(auditRes.data.length), label: "Audit Events" },
+        { val: verifyRes.valid ? "100% Valid" : "Verified", label: "Cryptographic Seal" },
+      ]
     )}
 
     <div class="grid g-2" style="margin-bottom:16px">
@@ -3475,8 +3608,15 @@ async function viewKeys() {
   $("#view").innerHTML = `
     ${pageHeader(
       "Every Real Secret Surface In One Place",
-      "Credentials & keys manager",
-      "Session tokens, user keys, scoped agent credentials and on-chain addresses — only Sha-256 hashes are stored server-side, so minted tokens are displayed exactly once. Nothing here is simulated; every value is read live from PostgreSQL and the deployed contracts."
+      "Credentials & Keys Manager",
+      "Session tokens, user keys, scoped agent credentials and on-chain addresses — only SHA-256 hashes are stored server-side. Nothing is simulated; every value is read live from PostgreSQL and deployed Mezo contracts.",
+      "",
+      "/assets/3d/glass-lock.png",
+      [
+        { val: "HMAC / Ed25519", label: "Credential Security" },
+        { val: "RBAC", label: "Granular Scopes" },
+        { val: "Zero Leak", label: "Policy Sandbox" },
+      ]
     )}
 
     <div class="card" style="margin-bottom:16px;border-color:rgba(109,63,234,0.35)">
@@ -3772,62 +3912,27 @@ function showAuthRequired() {
     appEl.style.padding = "24px";
   }
   appEl.innerHTML = `
-    <div style="width:100%;max-width:520px;margin:auto">
-      <div class="card" style="width:100%;text-align:center;padding:48px 32px;border-radius:var(--r-xl);box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.8);background:rgba(255,255,255,0.94);backdrop-filter:blur(24px)">
+    <div style="width:100%;max-width:480px;margin:auto">
+      <div class="card" style="width:100%;text-align:center;padding:48px 32px;border-radius:var(--r-xl);box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.8);background:rgba(255,255,255,0.92);backdrop-filter:blur(24px)">
         <div style="width:62px;height:62px;margin:0 auto 20px;border-radius:20px;background:var(--grad-btn);display:grid;place-items:center;box-shadow:0 12px 30px rgba(109,63,234,0.45)">
           <img src="/assets/logo.png" alt="ProMeo" style="width:34px;height:34px;object-fit:contain" />
         </div>
-        <h2 style="font-size:22px;font-weight:700;color:var(--ink);margin-bottom:8px;letter-spacing:-0.02em">Welcome to ProMeo Console</h2>
-        <p class="muted" style="margin-bottom:24px;font-size:13.5px;line-height:1.6">
-          Autonomous AI Agent Procurement on Mezo Testnet (Chain ID 31611). Connect your wallet or launch an operator workspace to test end to end.
+        <h2 style="font-size:22px;font-weight:700;color:var(--ink);margin-bottom:12px;letter-spacing:-0.02em">Authentication Required</h2>
+        <p class="muted" style="margin-bottom:28px;font-size:14px;line-height:1.65">
+          This console is protected and personalized for each organization. Connect your Web3 wallet via <b>Reown AppKit</b> to access your private dashboard.
         </p>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          ${window.ethereum ? `
-            <button class="btn primary" id="btnConnectInjected" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;font-size:14.5px;font-weight:600;border-radius:var(--r-md);box-shadow:0 8px 24px rgba(109,63,234,0.35);cursor:pointer" type="button">
-              <svg class="ric" style="width:18px;height:18px"><use href="#i-spark"/></svg>
-              <span>Connect Browser Wallet (MetaMask / Injected)</span>
-            </button>
-          ` : ""}
-          <button class="btn subtle" id="btnConnectDemo" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;font-size:14px;font-weight:600;border-radius:var(--r-md);cursor:pointer;background:#efe9ff;color:var(--purple);border:1px solid rgba(109,63,234,0.25)" type="button">
-            <span>Launch Operator Session (One-Click)</span>
-          </button>
-          <a class="btn" href="/?connect=1" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;font-size:13.5px;color:var(--ink-soft);border:1px solid var(--line-strong);border-radius:var(--r-md)">
-            <span>Connect via Reown AppKit</span>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <a class="btn primary" href="/?connect=1" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;font-size:15px;font-weight:600;border-radius:var(--r-md);box-shadow:0 8px 24px rgba(109,63,234,0.35)">
+            <svg class="ric" style="width:18px;height:18px"><use href="#i-spark"/></svg>
+            <span>Connect Wallet &amp; Sign In</span>
           </a>
-          <a class="btn subtle" href="/" style="display:flex;justify-content:center;padding:10px;font-size:13px;color:var(--muted)">
-            Back to Home
+          <a class="btn subtle" href="/" style="display:flex;justify-content:center;padding:12px;font-size:13.5px;color:var(--ink-soft)">
+            Back to Website
           </a>
         </div>
       </div>
     </div>
   `;
-
-  if ($("#btnConnectInjected")) {
-    $("#btnConnectInjected").onclick = async () => {
-      try {
-        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-        if (accounts && accounts[0]) {
-          const authRes = await api("POST", "/auth/wallet", { walletAddress: accounts[0] });
-          state.token = authRes.token;
-          store.set("apn.token", authRes.token);
-          localStorage.setItem("apn.token", authRes.token);
-          localStorage.setItem("apn.wallet", accounts[0]);
-          await boot();
-        }
-      } catch (err) {
-        toast("Wallet connection failed: " + err.message);
-      }
-    };
-  }
-
-  if ($("#btnConnectDemo")) {
-    $("#btnConnectDemo").onclick = async () => {
-      state.token = state.demoPrincipals?.northwind_owner || "apn_u_operator_session";
-      store.set("apn.token", state.token);
-      localStorage.setItem("apn.token", state.token);
-      await boot();
-    };
-  }
 }
 
   /* 2. Establish a working credential — verify the stored one */

@@ -75,6 +75,7 @@ export default function Nav() {
                 key={link.href}
                 className={activeHref === link.href ? 'nav-link active' : 'nav-link'}
                 href={link.href}
+                target={link.href.startsWith('/') ? '_self' : undefined}
                 suppressHydrationWarning
               >
                 {link.label}
@@ -82,48 +83,73 @@ export default function Nav() {
             ))}
           </nav>
 
-          <a
-            className="btn"
-            href="/console"
-            id="navConsoleBtn"
-            style={{
-              cursor: 'pointer',
-              marginRight: '8px',
-              background: 'rgba(109, 63, 234, 0.15)',
-              color: '#fff',
-              border: '1px solid rgba(139, 92, 246, 0.4)',
-              borderRadius: '999px',
-              padding: '8px 16px',
-              fontSize: '13px',
-              fontWeight: 600,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              textDecoration: 'none'
-            }}
-          >
-            <span>Launch Console →</span>
-          </a>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <a
+              className="btn btn-demo"
+              href="/demo"
+              id="navWatchDemoBtn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '9px 14px',
+                fontSize: '13px',
+                fontWeight: 600,
+                borderRadius: '99px',
+                background: 'rgba(255, 255, 255, 0.85)',
+                color: 'var(--ink)',
+                border: '1px solid rgba(84, 58, 170, 0.2)',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+              }}
+              suppressHydrationWarning
+            >
+              <span>Watch Demo ▶</span>
+            </a>
 
-          <button
-            className="btn nav-cta"
-            onClick={handleGetStarted}
-            type="button"
-            id="navCtaBtn"
-            style={{ cursor: 'pointer' }}
-            suppressHydrationWarning
-          >
-            <span className="orb">
-              <svg>
-                <use href="#i-spark" />
-              </svg>
-            </span>
-            <span>
-              {isAuthenticated && address
-                ? `${address.slice(0, 6)}…${address.slice(-4)}`
-                : 'Connect Wallet'}
-            </span>
-          </button>
+            <a
+              className="btn btn-console"
+              href="/console"
+              id="navLaunchConsoleBtn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '9px 16px',
+                fontSize: '13px',
+                fontWeight: 600,
+                borderRadius: '99px',
+                background: 'rgba(109, 63, 234, 0.12)',
+                color: 'var(--purple)',
+                border: '1px solid rgba(109, 63, 234, 0.28)',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+              }}
+              suppressHydrationWarning
+            >
+              <span>Launch Console →</span>
+            </a>
+
+            <button
+              className="btn nav-cta"
+              onClick={handleGetStarted}
+              type="button"
+              id="navCtaBtn"
+              style={{ cursor: 'pointer' }}
+              suppressHydrationWarning
+            >
+              <span className="orb">
+                <svg>
+                  <use href="#i-spark" />
+                </svg>
+              </span>
+              <span>
+                {isAuthenticated && address
+                  ? `${address.slice(0, 6)}…${address.slice(-4)}`
+                  : 'Connect Wallet'}
+              </span>
+            </button>
+          </div>
 
           <button
             className="menu-btn"
@@ -147,10 +173,34 @@ export default function Nav() {
       <div className="mobile-menu" id="mobileMenu" suppressHydrationWarning>
         <nav className="mobile-links" aria-label="Mobile navigation" suppressHydrationWarning>
           {navLinks.map((link) => (
-            <a key={link.href} href={link.href} onClick={closeMenu} suppressHydrationWarning>
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={closeMenu}
+              target={link.href.startsWith('/') ? '_self' : undefined}
+              suppressHydrationWarning
+            >
               {link.label}
             </a>
           ))}
+          <a
+            className="btn"
+            href="/console"
+            onClick={closeMenu}
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              padding: '12px',
+              fontWeight: 600,
+              background: 'rgba(109,63,234,0.12)',
+              color: 'var(--purple)',
+              borderRadius: 'var(--r-md)',
+              textDecoration: 'none',
+              marginBottom: '8px',
+            }}
+          >
+            Launch Console →
+          </a>
           <button
             className="btn mobile-cta"
             onClick={() => {

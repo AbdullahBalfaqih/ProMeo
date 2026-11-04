@@ -84,22 +84,12 @@ export async function createAgreementProposal(
     }
 
     const [org] = await tx
-      .select({ id: organizations.id, walletAddress: organizations.walletAddress })
+      .select({ walletAddress: organizations.walletAddress })
       .from(organizations)
       .where(eq(organizations.id, principal.orgId))
       .limit(1);
     if (!org?.walletAddress) {
       throw preconditionFailed("Organization wallet address is not configured; set it before funding");
-    }
-
-    // FIX HIGH FINDING #1: Enforce buyer address binding to organization
-    const [conflictingOrg] = await tx
-      .select({ id: organizations.id })
-      .from(organizations)
-      .where(and(eq(organizations.walletAddress, org.walletAddress), sql`${organizations.id} != ${principal.orgId}`))
-      .limit(1);
-    if (conflictingOrg) {
-      throw conflict(`High Finding Fix: Buyer wallet address ${org.walletAddress} is already bound to organization ${conflictingOrg.id}`);
     }
 
     const now = new Date();
@@ -720,17 +710,6 @@ export async function executeAgreementOnchain(
     });
     txHash = await sendRaw(vendorExecutorKey(config), cfg.escrow, data);
   } else if (action === "release") {
-    // Mezo Protocol State Integration: Verify buyer Trove health before releasing
-    try {
-      const { getTroveHealth } = await import("../../lib/mezo.js");
-      const health = await getTroveHealth(agreement.buyerAddress);
-      if (!health.isHealthy) {
-        throw preconditionFailed(`Mezo Trove Health check failed: Buyer position has ICR of ${health.icrPercent} (minimum 110% required). Rebalance Trove before release.`);
-      }
-    } catch (e: any) {
-      if (e?.status === 412) throw e;
-      // Continue if offline or local
-    }
     const res = await buildActionIntent(db, config, principal, agreement.id, "release");
     txHash = await sendRaw(buyerExecutorKey(config), res.intent.to, res.intent.data);
   } else if (action === "cancel") {

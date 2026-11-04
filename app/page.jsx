@@ -1,6 +1,7 @@
 import Nav from '@/components/Nav';
 import Hero from '@/components/Hero';
 import Trusted from '@/components/Trusted';
+import InteractiveDashboard from '@/components/InteractiveDashboard';
 import Bento from '@/components/Bento';
 import Services from '@/components/Services';
 import Tokenomics from '@/components/Tokenomics';
@@ -21,6 +22,7 @@ export default function Page() {
 
       <main suppressHydrationWarning>
         <Hero />
+        <InteractiveDashboard />
         <Trusted />
         <Bento />
         <Services />

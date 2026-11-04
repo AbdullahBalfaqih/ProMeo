@@ -2,12 +2,13 @@
 pragma solidity 0.8.28;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
 /// @dev TEST DOUBLE ONLY. This is not Mezo USD. Tests never touch the real token;
 ///      integration against the deployed MUSD is covered by the RPC-level checks in
 ///      docs/MEZO_INTEGRATION.md and by the backend's read-only chain adapter.
-contract MockMUSD is ERC20 {
-    constructor() ERC20("Mock Mezo USD", "mMUSD") {}
+contract MockMUSD is ERC20, ERC20Permit {
+    constructor() ERC20("Mock Mezo USD", "mMUSD") ERC20Permit("Mock Mezo USD") {}
 
     function mint(address to, uint256 amount) external {
         _mint(to, amount);

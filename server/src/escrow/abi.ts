@@ -82,6 +82,37 @@ export const escrowAbi = [
   },
   {
     type: "function",
+    name: "releaseMilestone",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "agreementId", type: "bytes32" },
+      { name: "milestoneAmount", type: "uint256" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "getBtcPrice",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "btcValueOf",
+    stateMutability: "view",
+    inputs: [{ name: "musdAmount", type: "uint256" }],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "getBuyerVeBtcCount",
+    stateMutability: "view",
+    inputs: [{ name: "buyer", type: "address" }],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
     name: "cancelUnaccepted",
     stateMutability: "nonpayable",
     inputs: [{ name: "agreementId", type: "bytes32" }],

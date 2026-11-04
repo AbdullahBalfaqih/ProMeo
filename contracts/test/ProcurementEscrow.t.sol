@@ -3,12 +3,16 @@ pragma solidity 0.8.28;
 
 import {Test} from "forge-std/Test.sol";
 import {MockMUSD} from "./mocks/MockMUSD.sol";
+import {MockPriceFeed} from "./mocks/MockPriceFeed.sol";
+import {MockVeBTC} from "./mocks/MockVeBTC.sol";
 import {AgentPolicyRegistry} from "../src/AgentPolicyRegistry.sol";
 import {ProcurementEscrow} from "../src/ProcurementEscrow.sol";
 import {IProcurementEscrow} from "../src/interfaces/IProcurementEscrow.sol";
 
 contract ProcurementEscrowTest is Test {
     MockMUSD internal musd;
+    MockPriceFeed internal priceFeed;
+    MockVeBTC internal veBtc;
     AgentPolicyRegistry internal registry;
     ProcurementEscrow internal escrow;
 
@@ -29,11 +33,16 @@ contract ProcurementEscrowTest is Test {
     function setUp() public {
         vm.warp(1_800_000_000);
         musd = new MockMUSD();
+        priceFeed = new MockPriceFeed(65_000e18); // $65,000 / BTC
+        veBtc = new MockVeBTC();
         registry = new AgentPolicyRegistry(admin);
         escrow = new ProcurementEscrow(address(musd), address(registry), admin, feeRecipient, FEE_BPS);
 
         vm.startPrank(admin);
         escrow.grantRole(escrow.RESOLVER_ROLE(), resolver);
+        escrow.setPriceFeed(address(priceFeed));
+        escrow.setVeBtc(address(veBtc));
+        registry.setVeBtc(address(veBtc));
         registry.setAgentAuthorization(ORG, agent, true, uint64(block.timestamp + 30 days), keccak256("policy-v1"));
         vm.stopPrank();
 
@@ -398,6 +407,66 @@ contract ProcurementEscrowTest is Test {
         vm.prank(buyer);
         vm.expectRevert(ProcurementEscrow.InvalidAmount.selector);
         escrow.createAgreement(buyer, p);
+    }
+
+    function test_BuyerBindingEnforced() public {
+        ProcurementEscrow.CreateParams memory p = _params();
+        vm.prank(buyer);
+        escrow.createAgreement(buyer, p);
+        assertEq(escrow.orgBuyer(ORG), buyer);
+
+        // A stranger tries to use ORG with stranger as buyer
+        p.nonce = 2;
+        musd.mint(stranger, 1e25);
+        vm.prank(stranger);
+        musd.approve(address(escrow), type(uint256).max);
+
+        vm.prank(stranger);
+        vm.expectRevert(
+            abi.encodeWithSelector(ProcurementEscrow.BuyerNotBoundToOrg.selector, ORG, stranger, buyer)
+        );
+        escrow.createAgreement(stranger, p);
+    }
+
+    function test_MilestoneReleases() public {
+        ProcurementEscrow.CreateParams memory p = _params();
+        p.amount = 1_000e18;
+        vm.prank(buyer);
+        bytes32 id = escrow.createAgreement(buyer, p);
+
+        vm.prank(vendor);
+        escrow.accept(id);
+        vm.prank(vendor);
+        escrow.submitDelivery(id, keccak256("proof-m1"));
+
+        uint256 vendorBefore = musd.balanceOf(vendor);
+
+        // Release first milestone: 400 MUSD
+        vm.prank(buyer);
+        escrow.releaseMilestone(id, 400e18);
+        assertEq(musd.balanceOf(vendor), vendorBefore + 400e18);
+        assertEq(uint8(escrow.stateOf(id)), uint8(IProcurementEscrow.State.Accepted));
+
+        // Release remaining 600 MUSD via full release
+        vm.prank(buyer);
+        escrow.release(id);
+        assertEq(musd.balanceOf(vendor), vendorBefore + 1_000e18);
+        assertEq(uint8(escrow.stateOf(id)), uint8(IProcurementEscrow.State.Released));
+        assertEq(escrow.totalActiveEscrow(), 0);
+    }
+
+    function test_MezoPriceFeedAndVeBtc() public {
+        // Price feed check
+        uint256 btcPrice = escrow.getBtcPrice();
+        assertEq(btcPrice, 65_000e18);
+
+        // 65,000 MUSD should equal exactly 1 BTC
+        uint256 btcVal = escrow.btcValueOf(65_000e18);
+        assertEq(btcVal, 1e18);
+
+        // veBTC balance check
+        veBtc.setBalance(buyer, 5);
+        assertEq(escrow.getBuyerVeBtcCount(buyer), 5);
     }
 
     // ------------------------------------------------------------------

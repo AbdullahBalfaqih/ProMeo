@@ -2,39 +2,41 @@
 pragma solidity 0.8.28;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IAgentPolicyRegistry} from "./interfaces/IAgentPolicyRegistry.sol";
 import {IProcurementEscrow} from "./interfaces/IProcurementEscrow.sol";
+import {IMezoTroveManager} from "./interfaces/IMezoTrove.sol";
+import {IPriceFeed} from "./interfaces/IPriceFeed.sol";
+import {IVeBTC} from "./interfaces/IVeBTC.sol";
 
 /// @title ProcurementEscrow
 /// @notice MUSD-denominated escrow for agent-to-vendor procurement on Mezo.
 ///
-///         Money flow
-///         ----------
+///         Money flow & Settlement Modes
+///         -----------------------------
 ///         Buyer funds `amount` (vendor payment) plus `feeAmount` (protocol fee,
 ///         charged on top, never deducted from the vendor's quoted price). Both are
-///         held by this contract. On release the vendor receives exactly `amount`
-///         and the fee recipient receives `feeAmount`. On refund the buyer receives
-///         `amount + feeAmount`. On a split ruling the fee is pro-rated to the
-///         vendor's share so a buyer is never charged a full fee for work that was
-///         not delivered.
+///         held by this contract.
+///         Supports:
+///         - Single full settlement via `release`
+///         - Multi-stage milestone payouts via `releaseMilestone`
+///         - EIP-2612 gasless approval via `createAgreementWithPermit`
+///         - Deep Mezo protocol state verification (Trove health & collateral checking)
 ///
-///         Authority model
-///         ---------------
+///         Authority & Tenant Isolation model
+///         -----------------------------------
+///         * Strict Buyer-to-Org binding: Each buyer address is bound to its `orgId`,
+///           preventing arbitrary cross-tenant fund draining or unauthorized agreement creation.
 ///         * `buyer` may drive its own agreement (release, cancel, dispute).
 ///         * Any other caller must be an agent explicitly authorized for the
 ///           agreement's `orgId` in the AgentPolicyRegistry at execution time.
-///           Revoking an agent takes effect immediately, with no transaction
-///           needed on this contract.
-///         * `vendor` can accept, deliver, and — after the dispute window lapses —
-///           pull payment if the buyer goes silent.
-///         * `RESOLVER_ROLE` can split a disputed agreement. It can never move
-///           funds outside the three parties of that agreement.
-///         * `PAUSER_ROLE` can stop new agreements only; existing agreements can
-///           always reach a terminal state (safety over liveness for funds).
+///         * `vendor` can accept, deliver, and claim after the dispute window lapses.
+///         * `RESOLVER_ROLE` resolves disputed agreements.
+///         * `PAUSER_ROLE` pauses new agreements while permitting ongoing agreements to settle.
 contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
@@ -65,6 +67,7 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
         address vendor;
         uint256 amount;
         uint256 feeAmount;
+        uint256 releasedAmount;
         uint64 createdAt;
         uint64 acceptedAt;
         uint64 deliveredAt;
@@ -81,17 +84,43 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
     address public feeRecipient;
     uint16 public feeBps;
 
+    /// @notice Organization => Bound Buyer/Treasury Address
+    mapping(bytes32 => address) public orgBuyer;
+
+    /// @notice Optional Mezo Trove Manager contract for checking borrower ICR / collateral health
+    IMezoTroveManager public troveManager;
+    /// @notice Minimum Individual Collateral Ratio required (scaled by 1e18, 0 = disabled)
+    uint256 public minTroveHealthRatio;
+
+    /// @notice Mezo's native Skip BTC/USD price oracle (0x86bCF0841622a5dAC14A313a15f96A95421b9366 on testnet)
+    IPriceFeed public priceFeed;
+    /// @notice Mezo's vote-escrowed Bitcoin position NFT (0xB63fcCd03521Cf21907627bd7fA465C129479231 on testnet)
+    IVeBTC public veBtc;
+
     mapping(bytes32 => Agreement) private _agreements;
-    /// @notice Buyer to organization binding (Fix High Finding #1)
-    mapping(address => bytes32) public buyerOrg;
     /// @notice Total MUSD currently held for live agreements. Invariant target.
     uint256 public totalActiveEscrow;
     /// @notice Monotonic counter of agreements ever created, used by indexers.
     uint256 public agreementCount;
 
-    event OrgBound(address indexed buyer, bytes32 indexed orgId);
+    // ---------------------------------------------------------------------
+    // Events
+    // ---------------------------------------------------------------------
 
-    error OrgMismatch(bytes32 expected, bytes32 provided);
+    event OrgBuyerBound(bytes32 indexed orgId, address indexed buyer);
+    event OrgBuyerRebound(bytes32 indexed orgId, address indexed oldBuyer, address indexed newBuyer);
+    event MilestoneReleased(bytes32 indexed agreementId, uint256 amountReleased, uint256 totalReleased, uint256 remaining);
+    event TroveManagerUpdated(address indexed troveManager, uint256 minRatio);
+    event TroveHealthVerified(address indexed buyer, uint256 coll, uint256 debt);
+    event PriceFeedUpdated(address indexed priceFeed);
+    event VeBtcUpdated(address indexed veBtc);
+    event FeeUpdated(uint16 feeBps);
+    event FeeRecipientUpdated(address recipient);
+
+    // ---------------------------------------------------------------------
+    // Custom Errors
+    // ---------------------------------------------------------------------
+
     error ZeroAddress();
     error InvalidAmount();
     error InvalidFee();
@@ -105,6 +134,8 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
     error NotVendor();
     error NotParty();
     error AgentNotAuthorized(bytes32 orgId, address agent);
+    error BuyerNotBoundToOrg(bytes32 orgId, address attemptedBuyer, address boundBuyer);
+    error UnhealthyTrove(address buyer, uint256 coll, uint256 debt);
     error DeadlinePassed(bytes32 agreementId);
     error DeadlineNotPassed(bytes32 agreementId);
     error DisputeWindowOpen(bytes32 agreementId);
@@ -131,7 +162,7 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
     }
 
     // ---------------------------------------------------------------------
-    // Buyer side
+    // Buyer side & Agreement Lifecycle
     // ---------------------------------------------------------------------
 
     struct CreateParams {
@@ -148,13 +179,99 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
         bool feeOnTop;
     }
 
-    /// @notice Create and fund an agreement. Caller must either be the buyer or an
-    ///         agent authorized for `orgId` at call time.
+    /// @notice Bind or update an organization's designated buyer treasury address.
+    function setOrgBuyer(bytes32 orgId, address newBuyer) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (orgId == bytes32(0) || newBuyer == address(0)) revert ZeroAddress();
+        address oldBuyer = orgBuyer[orgId];
+        orgBuyer[orgId] = newBuyer;
+        emit OrgBuyerRebound(orgId, oldBuyer, newBuyer);
+    }
+
+    /// @notice Configure Mezo Trove Manager integration for protocol-level credit checks.
+    function setTroveManager(address troveManager_, uint256 minRatio_) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        troveManager = IMezoTroveManager(troveManager_);
+        minTroveHealthRatio = minRatio_;
+        emit TroveManagerUpdated(troveManager_, minRatio_);
+    }
+
+    /// @notice Set Mezo's native Skip BTC/USD price oracle address.
+    function setPriceFeed(address priceFeed_) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        priceFeed = IPriceFeed(priceFeed_);
+        emit PriceFeedUpdated(priceFeed_);
+    }
+
+    /// @notice Set Mezo's native veBTC NFT contract address.
+    function setVeBtc(address veBtc_) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        veBtc = IVeBTC(veBtc_);
+        emit VeBtcUpdated(veBtc_);
+    }
+
+    /// @notice Reads current BTC/USD price directly from Mezo's Skip oracle.
+    function getBtcPrice() public view returns (uint256) {
+        if (address(priceFeed) == address(0)) return 0;
+        return priceFeed.fetchPrice();
+    }
+
+    /// @notice Converts an MUSD amount to its equivalent BTC value using Mezo's live oracle.
+    function btcValueOf(uint256 musdAmount) external view returns (uint256) {
+        uint256 price = getBtcPrice();
+        if (price == 0) return 0;
+        return (musdAmount * 1e18) / price;
+    }
+
+    /// @notice Checks how many veBTC positions the buyer holds on Mezo.
+    function getBuyerVeBtcCount(address buyer) external view returns (uint256) {
+        if (address(veBtc) == address(0)) return 0;
+        return veBtc.balanceOf(buyer);
+    }
+
+    /// @notice Verify a buyer's Mezo Trove health and collateralization.
+    function checkBuyerTroveHealth(address buyer) public view returns (bool healthy, uint256 coll, uint256 debt) {
+        if (address(troveManager) == address(0) || minTroveHealthRatio == 0) {
+            return (true, 0, 0);
+        }
+        uint256 status = troveManager.getTroveStatus(buyer);
+        // Status 1 = active in Liquity/Mezo
+        if (status != 1) {
+            return (false, 0, 0);
+        }
+        coll = troveManager.getTroveColl(buyer);
+        debt = troveManager.getTroveDebt(buyer);
+        if (debt == 0) return (true, coll, debt);
+        // ICR in 1e18 format (coll * price / debt)
+        uint256 icr = troveManager.getCurrentICR(buyer, 1e18);
+        healthy = (icr >= minTroveHealthRatio);
+    }
+
+    /// @notice Create and fund an agreement. Caller must be the bound buyer or an
+    ///         authorized agent for `orgId`.
     /// @return agreementId Deterministic id of the agreement.
     function createAgreement(address buyer, CreateParams calldata p)
         external
         nonReentrant
         whenNotPaused
+        returns (bytes32 agreementId)
+    {
+        return _createAgreementInternal(buyer, p);
+    }
+
+    /// @notice Create and fund an agreement in a single transaction using EIP-2612 Permit.
+    function createAgreementWithPermit(
+        address buyer,
+        CreateParams calldata p,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external nonReentrant whenNotPaused returns (bytes32 agreementId) {
+        uint256 feeAmount = (p.amount * feeBps) / BPS_DENOMINATOR;
+        uint256 total = p.amount + feeAmount;
+        IERC20Permit(address(musd)).permit(buyer, address(this), total, deadline, v, r, s);
+        return _createAgreementInternal(buyer, p);
+    }
+
+    function _createAgreementInternal(address buyer, CreateParams calldata p)
+        internal
         returns (bytes32 agreementId)
     {
         if (buyer == address(0) || p.vendor == address(0)) revert ZeroAddress();
@@ -170,16 +287,29 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
             revert InvalidDisputeWindow();
         }
 
+        // High Finding #1 Resolution: Enforce that buyer address is bound to its orgId
+        address bound = orgBuyer[p.orgId];
+        address registryBound = registry.getOrgBuyer(p.orgId);
+        address expected = registryBound != address(0) ? registryBound : bound;
+
+        if (expected == address(0)) {
+            // First agreement for this organization binds the buyer address
+            orgBuyer[p.orgId] = buyer;
+            emit OrgBuyerBound(p.orgId, buyer);
+        } else if (expected != buyer) {
+            revert BuyerNotBoundToOrg(p.orgId, buyer, expected);
+        }
+
+        // Caller authorization: caller must be either the bound buyer itself or an authorized agent
         if (msg.sender != buyer && !registry.isAuthorized(p.orgId, msg.sender)) {
             revert AgentNotAuthorized(p.orgId, msg.sender);
         }
 
-        // Fix High Finding #1: Bind each buyer address to its org
-        if (buyerOrg[buyer] == bytes32(0)) {
-            buyerOrg[buyer] = p.orgId;
-            emit OrgBound(buyer, p.orgId);
-        } else if (buyerOrg[buyer] != p.orgId) {
-            revert OrgMismatch(buyerOrg[buyer], p.orgId);
+        // Check buyer Trove health if configured
+        if (address(troveManager) != address(0) && minTroveHealthRatio > 0) {
+            (bool healthy, uint256 coll, uint256 debt) = checkBuyerTroveHealth(buyer);
+            if (!healthy) revert UnhealthyTrove(buyer, coll, debt);
+            emit TroveHealthVerified(buyer, coll, debt);
         }
 
         agreementId = keccak256(
@@ -188,8 +318,6 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
         if (_agreements[agreementId].state != State.None) revert AgreementExists(agreementId);
 
         uint256 feeAmount = (p.amount * feeBps) / BPS_DENOMINATOR;
-        // `feeOnTop` is recorded for accounting clarity; the contract always
-        // charges the fee in addition to `amount` (never silently deducted).
         uint256 total = p.amount + feeAmount;
 
         Agreement storage a = _agreements[agreementId];
@@ -201,6 +329,7 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
         a.vendor = p.vendor;
         a.amount = p.amount;
         a.feeAmount = feeAmount;
+        a.releasedAmount = 0;
         a.createdAt = uint64(block.timestamp);
         a.acceptBy = p.acceptBy;
         a.deliverBy = p.deliverBy;
@@ -216,7 +345,7 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
         return agreementId;
     }
 
-    /// @notice Buyer releases payment for an accepted or delivered agreement.
+    /// @notice Buyer releases full remaining payment for an accepted or delivered agreement.
     function release(bytes32 agreementId) external nonReentrant {
         Agreement storage a = _requireKnown(agreementId);
         _requireBuyerAuthority(a);
@@ -224,6 +353,40 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
             revert InvalidState(agreementId, State.Delivered, a.state);
         }
         _settleRelease(agreementId, a);
+    }
+
+    /// @notice Release a partial milestone payment to the vendor.
+    function releaseMilestone(bytes32 agreementId, uint256 milestoneAmount) external nonReentrant {
+        Agreement storage a = _requireKnown(agreementId);
+        _requireBuyerAuthority(a);
+        if (a.state != State.Accepted && a.state != State.Delivered) {
+            revert InvalidState(agreementId, State.Delivered, a.state);
+        }
+        if (milestoneAmount == 0 || a.releasedAmount + milestoneAmount > a.amount) {
+            revert InvalidAmount();
+        }
+
+        a.releasedAmount += milestoneAmount;
+        uint256 fee = (milestoneAmount * feeBps) / BPS_DENOMINATOR;
+        uint256 totalMilestoneDeduction = milestoneAmount + fee;
+
+        if (totalActiveEscrow >= totalMilestoneDeduction) {
+            totalActiveEscrow -= totalMilestoneDeduction;
+        } else {
+            totalActiveEscrow = 0;
+        }
+
+        uint256 remaining = a.amount - a.releasedAmount;
+        if (remaining == 0) {
+            a.state = State.Released;
+        }
+
+        emit MilestoneReleased(agreementId, milestoneAmount, a.releasedAmount, remaining);
+
+        musd.safeTransfer(a.vendor, milestoneAmount);
+        if (fee > 0 && feeRecipient != address(0)) {
+            musd.safeTransfer(feeRecipient, fee);
+        }
     }
 
     /// @notice Cancel an agreement that the vendor never accepted, or cancel a
@@ -242,8 +405,6 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
         if (evidenceHash == bytes32(0)) revert InvalidAmount();
 
         if (a.state == State.Accepted) {
-            // Disputing an accepted, undelivered agreement is allowed until the
-            // delivery deadline (vendor failed to deliver in time).
             if (block.timestamp <= a.deliverBy) revert DeadlineNotPassed(agreementId);
         } else if (a.state == State.Delivered) {
             if (block.timestamp > a.deliveredAt + a.disputeWindow) revert DisputeWindowClosed(agreementId);
@@ -270,9 +431,7 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
         emit AgreementAccepted(agreementId, msg.sender, a.acceptedAt);
     }
 
-    /// @notice Vendor submits (or re-submits) a delivery proof hash. The hash is the
-    ///         keccak256 of the canonical delivery manifest produced by the backend;
-    ///         the raw manifest is pinned off-chain (see docs/DATA_MODEL.md).
+    /// @notice Vendor submits (or re-submits) a delivery proof hash.
     function submitDelivery(bytes32 agreementId, bytes32 proofHash) external nonReentrant {
         Agreement storage a = _requireKnown(agreementId);
         if (msg.sender != a.vendor) revert NotVendor();
@@ -290,8 +449,7 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
         emit DeliverySubmitted(agreementId, msg.sender, proofHash, a.deliveryCount);
     }
 
-    /// @notice Vendor claims payment after the dispute window has lapsed without a
-    ///         dispute or release. Protects vendors from buyer inaction.
+    /// @notice Vendor claims payment after the dispute window has lapsed without dispute or release.
     function claimAfterDisputeWindow(bytes32 agreementId) external nonReentrant {
         Agreement storage a = _requireKnown(agreementId);
         if (msg.sender != a.vendor) revert NotVendor();
@@ -304,9 +462,7 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
     // Resolution
     // ---------------------------------------------------------------------
 
-    /// @notice Resolve a disputed agreement. `vendorAmount` is paid to the vendor;
-    ///         the buyer receives `amount - vendorAmount`; the fee is pro-rated to
-    ///         the vendor share. `vendorAmount` must not exceed `amount`.
+    /// @notice Resolve a disputed agreement.
     function resolveDispute(bytes32 agreementId, uint256 vendorAmount, bytes32 rulingHash)
         external
         onlyRole(RESOLVER_ROLE)
@@ -314,14 +470,16 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
     {
         Agreement storage a = _requireKnown(agreementId);
         if (a.state != State.Disputed) revert InvalidState(agreementId, State.Disputed, a.state);
-        if (vendorAmount > a.amount) revert InvalidRuling();
+        uint256 unreleasedAmount = a.amount - a.releasedAmount;
+        if (vendorAmount > unreleasedAmount) revert InvalidRuling();
         if (rulingHash == bytes32(0)) revert InvalidAmount();
 
-        uint256 feeForVendor = (a.feeAmount * vendorAmount) / a.amount;
-        uint256 buyerAmount = (a.amount - vendorAmount) + (a.feeAmount - feeForVendor);
+        uint256 unreleasedFee = (a.feeAmount * unreleasedAmount) / a.amount;
+        uint256 feeForVendor = (unreleasedFee * vendorAmount) / unreleasedAmount;
+        uint256 buyerAmount = (unreleasedAmount - vendorAmount) + (unreleasedFee - feeForVendor);
 
         a.state = State.Released; // terminal
-        totalActiveEscrow -= (a.amount + a.feeAmount);
+        totalActiveEscrow -= (unreleasedAmount + unreleasedFee);
 
         if (vendorAmount > 0) musd.safeTransfer(a.vendor, vendorAmount);
         if (feeForVendor > 0) musd.safeTransfer(feeRecipient, feeForVendor);
@@ -331,7 +489,7 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
     }
 
     // ---------------------------------------------------------------------
-    // Fee administration
+    // Fee administration & Pause
     // ---------------------------------------------------------------------
 
     function setFeeBps(uint16 newFeeBps) external onlyRole(FEE_MANAGER_ROLE) {
@@ -353,9 +511,6 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
     function unpause() external onlyRole(PAUSER_ROLE) {
         _unpause();
     }
-
-    event FeeUpdated(uint16 feeBps);
-    event FeeRecipientUpdated(address recipient);
 
     // ---------------------------------------------------------------------
     // Views
@@ -441,29 +596,34 @@ contract ProcurementEscrow is IProcurementEscrow, AccessControl, Pausable, Reent
     }
 
     function _settleRelease(bytes32 agreementId, Agreement storage a) internal {
-        uint256 amount = a.amount;
-        uint256 fee = a.feeAmount;
+        uint256 unreleasedAmount = a.amount - a.releasedAmount;
+        if (unreleasedAmount == 0) revert InvalidAmount();
+
+        uint256 unreleasedFee = (unreleasedAmount * feeBps) / BPS_DENOMINATOR;
         address vendor = a.vendor;
 
+        a.releasedAmount = a.amount;
         a.state = State.Released;
-        totalActiveEscrow -= (amount + fee);
+        totalActiveEscrow -= (unreleasedAmount + unreleasedFee);
 
-        musd.safeTransfer(vendor, amount);
-        if (fee > 0) {
+        musd.safeTransfer(vendor, unreleasedAmount);
+        if (unreleasedFee > 0) {
             if (feeRecipient == address(0)) revert FeeRecipientUnset();
-            musd.safeTransfer(feeRecipient, fee);
+            musd.safeTransfer(feeRecipient, unreleasedFee);
         }
-        emit AgreementReleased(agreementId, vendor, amount, fee);
+        emit AgreementReleased(agreementId, vendor, unreleasedAmount, unreleasedFee);
     }
 
     function _settleRefund(bytes32 agreementId, Agreement storage a, bytes32 reasonHash) internal {
-        uint256 total = a.amount + a.feeAmount;
+        uint256 unreleasedAmount = a.amount - a.releasedAmount;
+        uint256 unreleasedFee = (unreleasedAmount * feeBps) / BPS_DENOMINATOR;
+        uint256 totalRefund = unreleasedAmount + unreleasedFee;
         address buyer = a.buyer;
 
         a.state = State.Refunded;
-        totalActiveEscrow -= total;
+        totalActiveEscrow -= totalRefund;
 
-        musd.safeTransfer(buyer, total);
-        emit AgreementRefunded(agreementId, buyer, total, reasonHash);
+        musd.safeTransfer(buyer, totalRefund);
+        emit AgreementRefunded(agreementId, buyer, totalRefund, reasonHash);
     }
 }

@@ -7,10 +7,10 @@
     "dev": "next dev -H 0.0.0.0 -p 3000",
     "build": "next build",
     "start": "next start -H 0.0.0.0 -p 3000",
-    "verify:contracts": "node scripts/verify-contracts.js",
     "lint": "next lint"
   },
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@gsap/react": "^2.1.2",
     "@metamask/connect-evm": "^2.1.1",
     "@reown/appkit": "^1.8.24",
@@ -23,6 +23,7 @@
     "framer-motion": "^14.6.0",
     "gsap": "^3.15.0",
     "next": "^15.5.28",
+    "puppeteer": "^25.16.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "viem": "^2.57.11",
