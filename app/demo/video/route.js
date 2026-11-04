@@ -14,7 +14,10 @@ export async function GET(req) {
     const fileSize = stat.size;
     const range = req.headers.get('range');
 
-    if (range) {
+    const url = new URL(req.url);
+    const isDownload = url.searchParams.get('download') === '1' || url.searchParams.has('download');
+
+    if (range && !isDownload) {
       const parts = range.replace(/bytes=/, '').split('-');
       const start = parseInt(parts[0], 10);
       const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
@@ -32,13 +35,17 @@ export async function GET(req) {
       });
     } else {
       const file = fs.createReadStream(videoPath);
+      const headers = {
+        'Content-Length': String(fileSize),
+        'Content-Type': 'video/mp4',
+        'Accept-Ranges': 'bytes',
+      };
+      if (isDownload) {
+        headers['Content-Disposition'] = 'attachment; filename="ProMeo_Product_Promo.mp4"';
+      }
       return new Response(file, {
         status: 200,
-        headers: {
-          'Content-Length': String(fileSize),
-          'Content-Type': 'video/mp4',
-          'Accept-Ranges': 'bytes',
-        },
+        headers,
       });
     }
   } catch (err) {
