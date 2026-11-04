@@ -85,6 +85,29 @@ export default function Nav() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <a
+              className="btn btn-demo"
+              href="/demo"
+              id="navWatchDemoBtn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '9px 14px',
+                fontSize: '13px',
+                fontWeight: 600,
+                borderRadius: '99px',
+                background: 'rgba(255, 255, 255, 0.85)',
+                color: 'var(--ink)',
+                border: '1px solid rgba(84, 58, 170, 0.2)',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+              }}
+              suppressHydrationWarning
+            >
+              <span>Watch Demo ▶</span>
+            </a>
+
+            <a
               className="btn btn-console"
               href="/console"
               id="navLaunchConsoleBtn"

@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ProMeo · SaaS Product Promo & Live MacBook Demo</title>
+<link rel="icon" href="/assets/logo.png" />
+<style>
+  :root {
+    --page-1: #0e0826;
+    --page-2: #1e1045;
+    --purple: #6d3fea;
+    --purple-light: #8b5cf6;
+    --ink: #ffffff;
+    --muted: #a59fc4;
+    --card: rgba(255, 255, 255, 0.06);
+    --border: rgba(139, 92, 246, 0.25);
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    min-height: 100vh;
+    background: radial-gradient(1200px 800px at 50% -10%, #2a1660 0%, transparent 70%), linear-gradient(170deg, var(--page-1) 0%, var(--page-2) 100%) fixed;
+    color: var(--ink);
+    font-family: var(--font);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 20px 48px;
+    overflow-x: hidden;
+  }
+
+  .nav {
+    width: 100%;
+    max-width: 1280px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #fff;
+  }
+  .brand img { width: 38px; height: 38px; }
+  .brand b { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+  .brand span { font-size: 12px; color: var(--muted); }
+
+  .nav-actions { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 99px;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+  }
+  .btn-primary {
+    background: var(--purple);
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(109, 63, 234, 0.4);
+  }
+  .btn-primary:hover { background: #7c4df2; transform: translateY(-2px); }
+  .btn-subtle {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  .btn-subtle:hover { background: rgba(255, 255, 255, 0.18); }
+
+  .header-content {
+    text-align: center;
+    max-width: 840px;
+    margin-bottom: 24px;
+  }
+  .pill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px;
+    border-radius: 99px;
+    background: rgba(109, 63, 234, 0.25);
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    font-size: 12px;
+    font-weight: 600;
+    color: #c4b5fd;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .pill-badge span.dot { width: 7px; height: 7px; border-radius: 50%; background: #a78bfa; box-shadow: 0 0 10px #a78bfa; }
+  h1 {
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  p.sub {
+    font-size: 16px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* Cinema MacBook Theater */
+  .cinema-wrap {
+    width: 100%;
+    max-width: 1140px;
+    position: relative;
+    margin-bottom: 28px;
+  }
+
+  .macbook-chassis {
+    position: relative;
+    border-radius: 24px;
+    background: #1c1c22;
+    border: 2px solid #3c3c46;
+    padding: 18px 18px 24px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), 0 0 40px rgba(109, 63, 234, 0.25);
+  }
+
+  .notch-bar {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 72px;
+    height: 12px;
+    background: #121215;
+    border-radius: 0 0 5px 5px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .notch-lens {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #080c12;
+    border: 1px solid #20242e;
+  }
+
+  .screen-bezel {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    aspect-ratio: 16 / 9;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+  }
+
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+  }
+
+  .macbook-lip {
+    position: relative;
+    margin: 0 auto;
+    width: calc(100% + 40px);
+    margin-left: -20px;
+    height: 16px;
+    background: linear-gradient(180deg, #b0b4be 0%, #8c909c 100%);
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  }
+  .macbook-thumb {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90px;
+    height: 5px;
+    background: #6a6e78;
+    border-radius: 0 0 4px 4px;
+  }
+
+  /* Play Overlay Button (if unmuted or paused) */
+  .play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(14, 8, 38, 0.45);
+    backdrop-filter: blur(4px);
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+    z-index: 10;
+  }
+  .play-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .big-play-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--purple);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 12px 32px rgba(109, 63, 234, 0.6);
+    transition: transform 0.2s ease;
+    margin-bottom: 12px;
+  }
+  .big-play-btn:hover { transform: scale(1.08); }
+  .play-overlay span {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  /* Chapters & Controls */
+  .chapters-wrap {
+    width: 100%;
+    max-width: 1140px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 18px 24px;
+    margin-bottom: 24px;
+    backdrop-filter: blur(16px);
+  }
+  .ch-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .ch-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ch-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .ch-pill {
+    padding: 8px 14px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #ddd;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .ch-pill:hover {
+    background: rgba(109, 63, 234, 0.3);
+    color: #fff;
+    border-color: var(--purple-light);
+  }
+  .ch-pill.active {
+    background: var(--purple);
+    color: #fff;
+    border-color: var(--purple);
+    box-shadow: 0 4px 14px rgba(109, 63, 234, 0.4);
+  }
+
+  /* 3D Feature Grid */
+  .features-grid {
+    width: 100%;
+    max-width: 1140px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .f-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .f-card img { width: 56px; height: 56px; object-fit: contain; }
+  .f-card b { display: block; font-size: 14.5px; font-weight: 700; margin-bottom: 2px; }
+  .f-card span { font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="brand" href="/">
+    <img src="/assets/logo.png" alt="ProMeo" />
+    <div>
+      <b>ProMeo</b>
+      <span>Mezo Chain 31611</span>
+    </div>
+  </a>
+  <div class="nav-actions">
+    <a class="btn btn-subtle" href="/">Website</a>
+    <a class="btn btn-subtle" href="/console">Live Console</a>
+    <a class="btn btn-primary" href="/demo/video" download="promeo_product_promo.mp4">Download 1080p MP4</a>
+  </div>
+</nav>
+
+<div class="header-content">
+  <div class="pill-badge">
+    <span class="dot"></span>
+    <span>SaaS Product Promo · 1080p 60fps Walkthrough</span>
+  </div>
+  <h1>Autonomous AI Agent Procurement</h1>
+  <p class="sub">
+    Discover, negotiate, and settle enterprise cloud compute with non-custodial smart contract escrow in MUSD and cryptographic Merkle verification on Mezo Blockchain.
+  </p>
+</div>
+
+<div class="cinema-wrap">
+  <div class="macbook-chassis">
+    <div class="notch-bar"><span class="notch-lens"></span></div>
+    <div class="screen-bezel">
+      <video id="promoVideo" src="/demo/video" playsinline preload="auto" controls></video>
+      <div class="play-overlay" id="playOverlay">
+        <div class="big-play-btn">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="#fff"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+        </div>
+        <span>Click to Play with English Voiceover</span>
+      </div>
+    </div>
+  </div>
+  <div class="macbook-lip"><span class="macbook-thumb"></span></div>
+</div>
+
+<div class="chapters-wrap">
+  <div class="ch-head">
+    <div class="ch-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Interactive Video Chapters (Click to Jump)</span>
+    </div>
+    <div style="font-size:12.5px;color:var(--muted)">Narration: English (Feminine) · Duration: 01:04</div>
+  </div>
+  <div class="ch-pills">
+    <button class="ch-pill" data-seek="0">00:00 · The $85B AI Problem</button>
+    <button class="ch-pill" data-seek="14">00:14 · The Solution on Mezo</button>
+    <button class="ch-pill" data-seek="28">00:28 · Why ProMeo & Value</button>
+    <button class="ch-pill" data-seek="42">00:42 · Live MacBook Demo</button>
+    <button class="ch-pill" data-seek="59">00:59 · Call to Action</button>
+  </div>
+</div>
+
+<div class="features-grid">
+  <div class="f-card">
+    <img src="/assets/3d/glass-lock.png" alt="Lock" />
+    <div>
+      <b>Non-Custodial MUSD Escrow</b>
+      <span>Programmatic lockup & release upon verified SLA delivery</span>
+    </div>
+  </div>
+  <div class="f-card">
+    <img src="/assets/3d/glass-pie.png" alt="Pie" />
+    <div>
+      <b>veBTC Staking Boost</b>
+      <span>+20% trust boost & real-time Trove collateral health</span>
+    </div>
+  </div>
+  <div class="f-card">
+    <img src="/assets/3d/glass-rocket.png" alt="Rocket" />
+    <div>
+      <b>18,432 Ops/min Velocity</b>
+      <span>Autonomous supplier broadcast & sub-second negotiation</span>
+    </div>
+  </div>
+  <div class="f-card">
+    <img src="/assets/3d/glass-shield.png" alt="Shield" />
+    <div>
+      <b>SHA-256 Merkle Audit</b>
+      <span>100% mathematically verifiable compliance trail</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  const vid = document.getElementById("promoVideo");
+  const overlay = document.getElementById("playOverlay");
+  const pills = document.querySelectorAll("[data-seek]");
+
+  overlay.addEventListener("click", () => {
+    vid.play();
+    overlay.classList.add("hidden");
+  });
+
+  vid.addEventListener("play", () => {
+    overlay.classList.add("hidden");
+  });
+
+  vid.addEventListener("pause", () => {
+    if (vid.currentTime < vid.duration - 1) {
+      overlay.classList.remove("hidden");
+    }
+  });
+
+  pills.forEach((p) => {
+    p.addEventListener("click", () => {
+      const seekTime = parseFloat(p.getAttribute("data-seek"));
+      vid.currentTime = seekTime;
+      vid.play();
+      overlay.classList.add("hidden");
+      pills.forEach((x) => x.classList.remove("active"));
+      p.classList.add("active");
+    });
+  });
+
+  vid.addEventListener("timeupdate", () => {
+    const cur = vid.currentTime;
+    pills.forEach((p) => {
+      const t = parseFloat(p.getAttribute("data-seek"));
+      const nextT = t + 14;
+      if (cur >= t && cur < nextT) {
+        p.classList.add("active");
+      } else {
+        p.classList.remove("active");
+      }
+    });
+  });
+
+  // Attempt auto play with sound or prompt
+  window.addEventListener("DOMContentLoaded", () => {
+    const playPromise = vid.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        overlay.classList.add("hidden");
+      }).catch(() => {
+        // Autoplay with sound restricted by browser; overlay stays visible
+        overlay.classList.remove("hidden");
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -85,6 +85,29 @@ export default function Hero() {
           >
             <span>Launch Live Console →</span>
           </a>
+
+          <a
+            className="btn btn-secondary"
+            href="/demo"
+            id="heroDemoBtn"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '12px 24px',
+              fontSize: '15px',
+              fontWeight: 600,
+              borderRadius: '99px',
+              background: 'rgba(109, 63, 234, 0.15)',
+              color: 'var(--purple)',
+              border: '1px solid rgba(109, 63, 234, 0.35)',
+              textDecoration: 'none',
+              backdropFilter: 'blur(10px)',
+              cursor: 'pointer',
+            }}
+          >
+            <span>Watch MacBook Demo (1080p) ▶</span>
+          </a>
         </div>
       </div>
 
